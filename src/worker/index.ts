@@ -1,11 +1,11 @@
 import { createProvider, type OAuthProvider } from "../oauth/providers";
+import { HttpError } from "../errors";
 import { validateOAuthRedirectUri } from "../oauth/redirect-uri";
 import type { EncryptedEnvelope, OAuthProviderId, UserRow } from "../types";
 import { loadWorkerConfig, type WorkerConfig, type WorkerEnv } from "./config";
 
 const cors = { "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token", Vary: "Origin" };
-class HttpError extends Error { constructor(readonly status: number, readonly payload: Record<string, unknown>) { super(String(payload.message)); } }
-const fail = (status: number, message: string, extra: Record<string, unknown> = {}) => new HttpError(status, { success: false, message, ...extra });
+const fail = (status: number, message: string, extra: Record<string, unknown> = {}) => new HttpError(status, message, { success: false, message, ...extra });
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json; charset=UTF-8" } });
 const nocontent = () => new Response(null, { status: 204, headers: cors });
 const now = () => new Date().toISOString();

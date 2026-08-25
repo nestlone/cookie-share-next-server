@@ -8,7 +8,7 @@ import { createBucket, deleteBucket, getBucket, listBuckets, updateBucket } from
 import { exchangeOAuth, listProviders, oauthCallback, startOAuth, unlinkOAuth } from "./routes/oauth";
 import { HttpError } from "./errors";
 import { applyCorsHeaders, applyCorsOrigin, applySecurityHeaders, sendCorsPreflight, sendJson } from "./http";
-import { dailyRateLimit, loginRateLimit, requireAuth } from "./middleware";
+import { adminRateLimit, dailyRateLimit, loginRateLimit, requireAuth } from "./middleware";
 import { createProvider, type OAuthProvider } from "./oauth/providers";
 import { ensureSchema } from "./schema";
 import { BucketStore } from "./store/buckets";
@@ -49,6 +49,7 @@ export function createApp(config: RuntimeConfig, db: DatabaseSync, configuredPro
   requestLog.pruneOlderThan(new Date(Date.now() - config.requestLogRetentionDays * 86_400_000).toISOString());
   const authRequired = requireAuth(sessions);
   const authRateLimit = loginRateLimit(config);
+  const adminRequestRateLimit = adminRateLimit(config);
   const userRateLimit = dailyRateLimit(requestLog, users);
   const app = express();
   app.disable("x-powered-by");
@@ -74,8 +75,8 @@ export function createApp(config: RuntimeConfig, db: DatabaseSync, configuredPro
   app.get("/api/v1/buckets/:id", authRequired, userRateLimit, (request, response) => getBucket(request, response, buckets));
   app.put("/api/v1/buckets/:id", authRequired, userRateLimit, (request, response) => updateBucket(request, response, users, buckets));
   app.delete("/api/v1/buckets/:id", authRequired, userRateLimit, (request, response) => deleteBucket(request, response, buckets));
-  app.get("/api/v1/admin/users", requireAdmin(config), (request, response) => listUsers(request, response, users, buckets));
-  app.patch("/api/v1/admin/users/:id", requireAdmin(config), (request, response) => updateUserQuota(request, response, users));
+  app.get("/api/v1/admin/users", adminRequestRateLimit, requireAdmin(config), (request, response) => listUsers(request, response, users, buckets));
+  app.patch("/api/v1/admin/users/:id", adminRequestRateLimit, requireAdmin(config), (request, response) => updateUserQuota(request, response, users));
   app.use(express.static(path.join(config.serverRoot, "site"), { index: "index.html" }));
   app.use((_request, _response, next) => next(new HttpError(404, "Not Found", { success: false, message: "Not Found" })));
   const errorHandler: ErrorRequestHandler = (error, _request, response, next) => { if (response.headersSent) { next(error); return; } const httpError = buildError(error); sendJson(response, httpError.status, httpError.payload as ErrorPayload); };

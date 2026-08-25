@@ -31,7 +31,7 @@ export function requireAuth(sessions: SessionStore) {
 /**
  * Login rate limiter: in-memory per-IP burst protection.
  */
-export function loginRateLimit(config: RuntimeConfig) {
+function ipRateLimit(config: RuntimeConfig, message: string) {
   const attempts = new Map<string, number[]>();
   const limit = config.loginRateLimit;
   const windowMs = config.loginRateWindowMin * 60_000;
@@ -60,9 +60,9 @@ export function loginRateLimit(config: RuntimeConfig) {
     const timestamps = (attempts.get(ip) ?? []).filter((t) => t > cutoff);
 
     if (timestamps.length >= limit) {
-      throw new HttpError(429, "Too many login attempts. Try again later.", {
+      throw new HttpError(429, message, {
         success: false,
-        message: "Too many login attempts. Try again later.",
+        message,
       });
     }
 
@@ -70,6 +70,14 @@ export function loginRateLimit(config: RuntimeConfig) {
     attempts.set(ip, timestamps);
     next();
   };
+}
+
+export function loginRateLimit(config: RuntimeConfig) {
+  return ipRateLimit(config, "Too many login attempts. Try again later.");
+}
+
+export function adminRateLimit(config: RuntimeConfig) {
+  return ipRateLimit(config, "Too many admin requests. Try again later.");
 }
 
 /**

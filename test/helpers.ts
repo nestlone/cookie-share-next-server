@@ -30,7 +30,7 @@ export class FakeProvider implements OAuthProvider {
 
 export async function createTestServer(overrides: Partial<RuntimeConfig> = {}, providers: OAuthProvider[] = [new FakeProvider("github", { subject: "github-alice", login: "alice" }), new FakeProvider("google", { subject: "google-alice", login: "alice@example.com" })]): Promise<TestServer> {
   const config: RuntimeConfig = {
-    host: "127.0.0.1", port: 0, serverRoot: process.cwd(), dbPath: ":memory:", publicBaseUrl: "http://127.0.0.1:3000", adminToken: "test-admin-token", defaultQuotaBytes: 1024 * 1024, defaultDailyRequestLimit: 100, sessionTtlHours: 24, loginRateLimit: 100, loginRateWindowMin: 1, requestLogRetentionDays: 7, oauthProviders: [], ...overrides,
+    host: "127.0.0.1", port: 0, serverRoot: process.cwd(), dbPath: ":memory:", publicBaseUrl: "http://127.0.0.1:3000", adminToken: "test-admin-token", allowedExtensionIds: [], defaultQuotaBytes: 1024 * 1024, defaultDailyRequestLimit: 100, sessionTtlHours: 24, loginRateLimit: 100, loginRateWindowMin: 1, requestLogRetentionDays: 7, oauthProviders: [], ...overrides,
   };
   const db = openDatabase(":memory:");
   const app = createApp(config, db, providers);

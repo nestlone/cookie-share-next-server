@@ -50,7 +50,7 @@ export function isEncryptedEnvelope(value: unknown): value is EncryptedEnvelope 
 
   const candidate = value as Record<string, unknown>;
   return (
-    candidate.version === 1 &&
+    (candidate.version === 1 || candidate.version === 2) &&
     typeof candidate.salt === "string" &&
     typeof candidate.iv === "string" &&
     typeof candidate.payload === "string" &&

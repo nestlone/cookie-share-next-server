@@ -5,6 +5,7 @@ export interface WorkerEnv {
   ASSETS: Fetcher;
   PUBLIC_BASE_URL: string;
   ADMIN_TOKEN: string;
+  ALLOWED_EXTENSION_IDS?: string;
   GITHUB_CLIENT_ID?: string;
   GITHUB_CLIENT_SECRET?: string;
   GOOGLE_CLIENT_ID?: string;
@@ -22,6 +23,7 @@ export interface WorkerEnv {
 export interface WorkerConfig {
   publicBaseUrl: string;
   adminToken: string;
+  allowedExtensionIds: string[];
   defaultQuotaBytes: number;
   defaultDailyRequestLimit: number;
   sessionTtlHours: number;
@@ -45,6 +47,13 @@ function integer(env: WorkerEnv, name: keyof WorkerEnv, fallback: number): numbe
   return parsed;
 }
 
+function extensionIds(env: WorkerEnv): string[] {
+  const raw = env.ALLOWED_EXTENSION_IDS?.trim() ?? "";
+  const ids = raw ? raw.split(",").map((value) => value.trim()).filter(Boolean) : [];
+  if (ids.some((id) => !/^[a-p]{32}$/.test(id))) throw new Error("Invalid Worker binding: ALLOWED_EXTENSION_IDS");
+  return [...new Set(ids)];
+}
+
 export function loadWorkerConfig(env: WorkerEnv): WorkerConfig {
   const providers: Array<[OAuthProviderId, "GITHUB" | "GOOGLE" | "LINUXDO"]> = [["github", "GITHUB"], ["google", "GOOGLE"], ["linuxdo", "LINUXDO"]];
   const oauthProviders = providers.flatMap(([id, prefix]) => {
@@ -59,6 +68,7 @@ export function loadWorkerConfig(env: WorkerEnv): WorkerConfig {
   return {
     publicBaseUrl: required(env, "PUBLIC_BASE_URL").replace(/\/$/, ""),
     adminToken: required(env, "ADMIN_TOKEN"),
+    allowedExtensionIds: extensionIds(env),
     defaultQuotaBytes: integer(env, "DEFAULT_QUOTA_BYTES", 104857600),
     defaultDailyRequestLimit: integer(env, "DEFAULT_DAILY_REQUEST_LIMIT", 1000),
     sessionTtlHours: integer(env, "SESSION_TTL_HOURS", 720),

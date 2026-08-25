@@ -50,4 +50,19 @@ describe("OAuth authentication", () => {
     expect((await requestJson(testServer.baseUrl, "/auth/oauth/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) })).response.status).toBe(200);
     expect((await requestJson(testServer.baseUrl, "/auth/oauth/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) })).response.status).toBe(401);
   });
+
+  it("only permits OAuth result redirects for explicitly allowed extension IDs", async () => {
+    const allowedId = "abcdefghijklmnopabcdefghijklmnop";
+    testServer = await createTestServer({ publicBaseUrl: "https://service.example", allowedExtensionIds: [allowedId] });
+    const rejected = await requestJson(testServer.baseUrl, "/auth/oauth/github/start", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: "login", redirectUri: "https://ponmlkjihgfedcbaponmlkjihgfedcba.chromiumapp.org/callback" }),
+    });
+    expect(rejected.response.status).toBe(400);
+    const accepted = await requestJson(testServer.baseUrl, "/auth/oauth/github/start", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: "login", redirectUri: `https://${allowedId}.chromiumapp.org/callback` }),
+    });
+    expect(accepted.response.status).toBe(200);
+  });
 });

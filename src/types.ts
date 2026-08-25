@@ -14,6 +14,7 @@ export interface RuntimeConfig {
   dbPath: string;
   publicBaseUrl: string;
   adminToken: string;
+  allowedExtensionIds: string[];
   defaultQuotaBytes: number;
   defaultDailyRequestLimit: number;
   sessionTtlHours: number;

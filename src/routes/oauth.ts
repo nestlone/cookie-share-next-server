@@ -10,7 +10,6 @@ import type { OAuthStateStore } from "../store/oauth-states";
 import type { ProviderAccountStore } from "../store/provider-accounts";
 import type { SessionStore } from "../store/sessions";
 import type { UserStore } from "../store/users";
-
 function providerId(value: string): OAuthProviderId {
   if (value !== "github" && value !== "google" && value !== "linuxdo") throw new HttpError(404, "OAuth provider not found", { success: false, message: "OAuth provider not found" });
   return value;
@@ -27,15 +26,7 @@ function requirePayload(body: unknown): Record<string, unknown> {
   return body as Record<string, unknown>;
 }
 
-function validateRedirectUri(value: unknown): string {
-  if (typeof value !== "string") throw new HttpError(400, "Invalid redirectUri", { success: false, message: "Invalid redirectUri" });
-  let url: URL;
-  try { url = new URL(value); } catch { throw new HttpError(400, "Invalid redirectUri", { success: false, message: "Invalid redirectUri" }); }
-  const chromiumRedirect = url.protocol === "https:" && url.hostname.endsWith(".chromiumapp.org");
-  const localTestRedirect = url.protocol === "http:" && (url.hostname === "127.0.0.1" || url.hostname === "localhost");
-  if (!chromiumRedirect && !localTestRedirect) throw new HttpError(400, "Unsupported redirectUri", { success: false, message: "Unsupported redirectUri" });
-  return url.toString();
-}
+import { validateOAuthRedirectUri } from "../oauth/redirect-uri";
 
 function redirect(response: Response, redirectUri: string, params: Record<string, string>): void {
   const url = new URL(redirectUri);
@@ -73,7 +64,7 @@ export function startOAuth(request: Request, response: Response, config: Runtime
     if (userId === undefined) throw new HttpError(401, "Unauthorized", { success: false, message: "Unauthorized" });
   }
   const { verifier, challenge } = createPkce();
-  const state = states.create({ provider: provider.id, mode, userId, redirectUri: validateRedirectUri(body.redirectUri), codeVerifier: verifier });
+  const state = states.create({ provider: provider.id, mode, userId, redirectUri: validateOAuthRedirectUri(body.redirectUri, config.allowedExtensionIds, config.publicBaseUrl), codeVerifier: verifier });
   const callback = `${config.publicBaseUrl}/api/v1/auth/oauth/${provider.id}/callback`;
   sendJson(response, 200, { authorizeUrl: provider.authorizeUrl({ redirectUri: callback, state: state.state, codeChallenge: challenge }) });
 }

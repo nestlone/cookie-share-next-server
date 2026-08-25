@@ -7,7 +7,7 @@ import { listUsers, requireAdmin, updateUserQuota } from "./routes/admin";
 import { createBucket, deleteBucket, getBucket, listBuckets, updateBucket } from "./routes/buckets";
 import { exchangeOAuth, listProviders, oauthCallback, startOAuth, unlinkOAuth } from "./routes/oauth";
 import { HttpError } from "./errors";
-import { sendCorsPreflight, sendJson } from "./http";
+import { applyCorsHeaders, applyCorsOrigin, applySecurityHeaders, sendCorsPreflight, sendJson } from "./http";
 import { dailyRateLimit, loginRateLimit, requireAuth } from "./middleware";
 import { createProvider, type OAuthProvider } from "./oauth/providers";
 import { ensureSchema } from "./schema";
@@ -52,6 +52,13 @@ export function createApp(config: RuntimeConfig, db: DatabaseSync, configuredPro
   const userRateLimit = dailyRateLimit(requestLog, users);
   const app = express();
   app.disable("x-powered-by");
+  app.set("trust proxy", 1);
+  app.use((request, response, next) => {
+    applySecurityHeaders(response);
+    applyCorsHeaders(response);
+    applyCorsOrigin(response, request.header("Origin"), config.allowedExtensionIds);
+    next();
+  });
   app.use(express.json({ limit: "10mb" }));
   app.use((request, response, next) => { if (request.method === "OPTIONS") { sendCorsPreflight(response); return; } next(); });
   app.get("/api/v1/health", (_request, response) => sendJson(response, 200, { status: "ok", version: 1 }));

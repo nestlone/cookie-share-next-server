@@ -24,6 +24,14 @@ function optionalInt(name: string, fallback: number): number {
   return parsed;
 }
 
+function extensionIds(): string[] {
+  const raw = process.env.ALLOWED_EXTENSION_IDS?.trim() ?? "";
+  if (!raw) return [];
+  const ids = raw.split(",").map((value) => value.trim()).filter(Boolean);
+  if (ids.some((id) => !/^[a-p]{32}$/.test(id))) throw new HttpError(500, "Invalid ALLOWED_EXTENSION_IDS", { success: false, error: "Invalid ALLOWED_EXTENSION_IDS" }, { plain: true });
+  return [...new Set(ids)];
+}
+
 function resolvePort(): number {
   const port = Number(process.env.PORT?.trim() ?? "3000");
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new HttpError(500, "Invalid PORT", { success: false, error: "Invalid PORT" }, { plain: true });
@@ -56,6 +64,7 @@ export function loadRuntimeConfig(): RuntimeConfig {
     dbPath: resolveDbPath(optionalString("DB_PATH", "./data/cookie-share-next.db")),
     publicBaseUrl,
     adminToken: requireString("ADMIN_TOKEN"),
+    allowedExtensionIds: extensionIds(),
     defaultQuotaBytes: optionalInt("DEFAULT_QUOTA_BYTES", 104857600),
     defaultDailyRequestLimit: optionalInt("DEFAULT_DAILY_REQUEST_LIMIT", 1000),
     sessionTtlHours: optionalInt("SESSION_TTL_HOURS", 720),

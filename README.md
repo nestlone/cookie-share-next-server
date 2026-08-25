@@ -8,6 +8,8 @@ The same deployment also serves the public portal at `/`; API traffic remains un
 
 Users authenticate through GitHub, Google, or LinuxDo OAuth. Provider identities are keyed by provider and subject; matching email addresses are never merged automatically. A signed-in user may manually link additional providers.
 
+OAuth results are delivered only to the Chrome extension IDs listed in `ALLOWED_EXTENSION_IDS`; this service never accepts a `*.chromiumapp.org` wildcard. New extension envelopes use PBKDF2-SHA-256 with 600,000 iterations. Existing version-1 envelopes remain readable at their original 100,000 iterations.
+
 Bucket passwords are never submitted to this server. Stored records contain a bucket ID, encrypted envelope, ciphertext byte size, and timestamps. This does not conceal account identities, bucket counts, approximate ciphertext sizes, or request timing. See [the protocol and threat model](docs/protocol.md) for the data model and cryptographic format.
 
 ## Requirements
@@ -31,6 +33,7 @@ Edit `.env` before starting. Set a long random `ADMIN_TOKEN`, the public HTTPS o
 ```dotenv
 PUBLIC_BASE_URL=https://cookie.nestlone.com
 ADMIN_TOKEN=replace-with-a-long-random-secret
+ALLOWED_EXTENSION_IDS=kilogkcionjhdmmeafjogdhpoiocgaom
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
 GOOGLE_CLIENT_ID=
@@ -49,6 +52,7 @@ LINUXDO_CLIENT_SECRET=
 | `PORT` | `3000` | HTTP listen port. |
 | `DB_PATH` | `./data/cookie-share-next.db` | SQLite database path. |
 | `ADMIN_TOKEN` | required | Token required by the admin quota API. |
+| `ALLOWED_EXTENSION_IDS` | required in production | Comma-separated Chrome extension IDs allowed to receive OAuth results. The official extension ID is `kilogkcionjhdmmeafjogdhpoiocgaom`; self-hosters should use their own fixed extension ID. |
 | `PUBLIC_BASE_URL` | required | Public origin used for OAuth callbacks. |
 | `DEFAULT_QUOTA_BYTES` | `104857600` | Storage allowance for newly created accounts. |
 | `DEFAULT_DAILY_REQUEST_LIMIT` | `1000` | Requests allowed per account per UTC day. |
@@ -151,7 +155,7 @@ Workers is a separate deployment target with the same `/api/v1` HTTP contract as
    | --- | --- |
    | `PUBLIC_BASE_URL`, `GITHUB_CLIENT_ID`, `GOOGLE_CLIENT_ID`, `LINUXDO_CLIENT_ID` | Text |
    | `ADMIN_TOKEN`, `GITHUB_CLIENT_SECRET`, `GOOGLE_CLIENT_SECRET`, `LINUXDO_CLIENT_SECRET` | Secret |
-   | `DEFAULT_QUOTA_BYTES`, `DEFAULT_DAILY_REQUEST_LIMIT`, `SESSION_TTL_HOURS`, `LOGIN_RATE_LIMIT`, `LOGIN_RATE_WINDOW_MIN`, `REQUEST_LOG_RETENTION_DAYS` | Text |
+   | `ALLOWED_EXTENSION_IDS`, `DEFAULT_QUOTA_BYTES`, `DEFAULT_DAILY_REQUEST_LIMIT`, `SESSION_TTL_HOURS`, `LOGIN_RATE_LIMIT`, `LOGIN_RATE_WINDOW_MIN`, `REQUEST_LOG_RETENTION_DAYS` | Text |
 
    No binding in this application uses the JSON type. `DB` is not created in this UI: it is the D1 binding declared in `wrangler.toml`. This project sets `keep_vars = true`, so future Git-driven deployments preserve dashboard-configured text variables such as `PUBLIC_BASE_URL` and `GITHUB_CLIENT_ID`.
 
@@ -162,7 +166,7 @@ npm run worker:db:migrate:local
 npm run worker:dev
 ```
 
-`PUBLIC_BASE_URL` must be the externally visible Worker origin. Register each provider callback as `<PUBLIC_BASE_URL>/api/v1/auth/oauth/<provider>/callback`. A daily Worker cron removes expired sessions, OAuth records, login-attempt records, and retained request logs. D1 and Workers service limits apply; the quota values in this application are logical ciphertext-storage limits, not a reservation of D1 capacity.
+`PUBLIC_BASE_URL` must be the externally visible Worker origin. Register each provider callback as `<PUBLIC_BASE_URL>/api/v1/auth/oauth/<provider>/callback`. Set `ALLOWED_EXTENSION_IDS` before enabling OAuth. The released official extension has ID `kilogkcionjhdmmeafjogdhpoiocgaom`, including when loaded unpacked from the release ZIP. A daily Worker cron removes expired sessions, OAuth records, login-attempt records, and retained request logs. D1 and Workers service limits apply; the quota values in this application are logical ciphertext-storage limits, not a reservation of D1 capacity.
 
 ## Development
 

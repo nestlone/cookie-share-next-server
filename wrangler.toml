@@ -25,3 +25,5 @@ SESSION_TTL_HOURS = "720"
 LOGIN_RATE_LIMIT = "10"
 LOGIN_RATE_WINDOW_MIN = "15"
 REQUEST_LOG_RETENTION_DAYS = "7"
+# Official release extension ID. Forks using a different extension must replace it.
+ALLOWED_EXTENSION_IDS = "kilogkcionjhdmmeafjogdhpoiocgaom"

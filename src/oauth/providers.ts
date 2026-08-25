@@ -82,7 +82,14 @@ export function createProvider(config: OAuthProviderConfig): OAuthProvider {
       if (!tokenResponse.ok) throw new Error("Provider token exchange failed");
       const tokenPayload = await tokenResponse.json() as { access_token?: unknown };
       if (typeof tokenPayload.access_token !== "string") throw new Error("Provider did not return an access token");
-      const identityResponse = await fetch(definition.userinfoUrl, { headers: { Authorization: `Bearer ${tokenPayload.access_token}`, Accept: "application/json" } });
+      const identityResponse = await fetch(definition.userinfoUrl, {
+        headers: {
+          Authorization: `Bearer ${tokenPayload.access_token}`,
+          Accept: config.id === "github" ? "application/vnd.github+json" : "application/json",
+          // GitHub rejects REST API requests that omit a valid User-Agent.
+          ...(config.id === "github" ? { "User-Agent": "cookie-share-next" } : {}),
+        },
+      });
       if (!identityResponse.ok) throw new Error("Provider identity request failed");
       return validIdentity(definition.parseIdentity(await identityResponse.json() as Record<string, unknown>));
     },

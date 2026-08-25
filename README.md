@@ -12,7 +12,7 @@ Bucket passwords are never submitted to this server. Stored records contain a bu
 
 - Node.js 22.5 or newer, including `node:sqlite` support.
 - SQLite storage available to the Node.js process.
-- An HTTPS reverse proxy for public deployment.
+- For public OAuth deployments, HTTPS must be provided by the surrounding infrastructure.
 - At least one configured OAuth client.
 
 ## Quick start
@@ -67,14 +67,111 @@ Register each provider client with a callback URL under:
 
 The extension starts OAuth using PKCE and exchanges a short-lived, single-use result code for a session token. Do not include client secrets in the extension, logs, source control, or client-visible configuration.
 
-## Deployment
+## Docker deployment
 
-Run the service behind an HTTPS reverse proxy that forwards the public host and terminates TLS. Keep the SQLite database and `.env` readable only by the service account. Back up the database as opaque encrypted user data, and protect `ADMIN_TOKEN` as an administrative secret.
+Docker Compose runs one backend container and persists the SQLite database in the `cookie-share-next-data` named volume. It does not configure a reverse proxy or TLS termination.
+
+1. Copy and configure the environment file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Set `ADMIN_TOKEN`, `PUBLIC_BASE_URL`, and a complete OAuth client ID/secret pair. `PUBLIC_BASE_URL` must be the externally reachable HTTPS origin, because it determines the OAuth callback URL.
+
+2. Build and start the service:
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+   The service listens on host port `3000` by default. Set `HOST_PORT` before starting Compose to publish a different host port:
+
+   ```bash
+   HOST_PORT=8080 docker compose up -d
+   ```
+
+3. Verify readiness:
+
+   ```bash
+   curl http://127.0.0.1:3000/api/v1/health
+   docker compose ps
+   ```
+
+   For a public deployment, provide HTTPS outside this Compose stack and register the OAuth callback URL as:
+
+   ```text
+   <PUBLIC_BASE_URL>/api/v1/auth/oauth/<provider>/callback
+   ```
+
+### Data and upgrades
+
+The SQLite database is stored in the `cookie-share-next-data` volume. Do not run `docker compose down -v` unless intentionally deleting all service data.
+
+Before upgrading, create a backup while the service is stopped:
+
+```bash
+docker compose stop
+docker run --rm \
+  -v cookie-share-next-data:/data:ro \
+  -v "$(pwd)":/backup \
+  alpine tar -C /data -czf /backup/cookie-share-next-data-backup.tgz .
+```
+
+Then rebuild and start the updated version:
+
+```bash
+docker compose up -d --build
+```
+
+Keep `.env`, the database volume, and backups protected as sensitive service data. `ADMIN_TOKEN` and OAuth client secrets must never be committed or exposed to clients.
 
 The service exposes an administrative quota API authenticated by `X-Admin-Token`:
 
 - `GET /api/v1/admin/users`
 - `PATCH /api/v1/admin/users/:id` with `{ "quotaBytes": 104857600, "dailyRequestLimit": 1000 }`
+
+## Cloudflare Workers + D1 deployment
+
+Workers is a separate deployment target with the same `/api/v1` HTTP contract as the Node and Docker server. It uses D1 rather than the SQLite file, so existing SQLite accounts, sessions, and buckets are **not migrated** automatically.
+
+1. Create a D1 database and replace the placeholder `database_id` in `wrangler.toml` with its ID:
+
+   ```bash
+   npx wrangler d1 create cookie-share-next
+   ```
+
+2. Apply the versioned schema migration:
+
+   ```bash
+   npm run worker:db:migrate
+   ```
+
+3. Put production secrets into Cloudflare. Do not commit them and do not upload `.env` as a Worker secret file:
+
+   ```bash
+   npx wrangler secret put PUBLIC_BASE_URL
+   npx wrangler secret put ADMIN_TOKEN
+   npx wrangler secret put GITHUB_CLIENT_ID
+   npx wrangler secret put GITHUB_CLIENT_SECRET
+   ```
+
+   Configure at least one complete client ID/client-secret pair. Google and LinuxDo use the analogous `GOOGLE_*` and `LINUXDO_*` secret names. The non-secret quota, TTL, retention, and login-rate settings are under `[vars]` in `wrangler.toml`.
+
+4. Deploy:
+
+   ```bash
+   npm run worker:deploy
+   ```
+
+For local Worker development, create an uncommitted `backend/.dev.vars` containing the same bindings, then run:
+
+```bash
+npm run worker:db:migrate:local
+npm run worker:dev
+```
+
+`PUBLIC_BASE_URL` must be the externally visible Worker origin. Register each provider callback as `<PUBLIC_BASE_URL>/api/v1/auth/oauth/<provider>/callback`. A daily Worker cron removes expired sessions, OAuth records, login-attempt records, and retained request logs. D1 and Workers service limits apply; the quota values in this application are logical ciphertext-storage limits, not a reservation of D1 capacity.
 
 ## Development
 
@@ -82,6 +179,7 @@ The service exposes an administrative quota API authenticated by `X-Admin-Token`
 npm ci
 npm run build
 npm test
+npm run worker:typecheck
 ```
 
 For a local development server:

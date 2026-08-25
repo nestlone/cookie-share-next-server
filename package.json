@@ -11,17 +11,24 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "worker:typecheck": "tsc -p tsconfig.worker.json",
+    "worker:dev": "wrangler dev --local",
+    "worker:db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "worker:db:migrate": "wrangler d1 migrations apply DB --remote",
+    "worker:deploy": "wrangler deploy"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
     "express": "^5.1.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260825.1",
     "@types/express": "^5.0.3",
     "@types/node": "^24.6.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
-    "vitest": "^1.6.1"
+    "vitest": "^1.6.1",
+    "wrangler": "^4.125.0"
   }
 }

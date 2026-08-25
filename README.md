@@ -135,7 +135,7 @@ The service exposes an administrative quota API authenticated by `X-Admin-Token`
 
 Workers is a separate deployment target with the same `/api/v1` HTTP contract as the Node and Docker server. It uses D1 rather than the SQLite file, so existing SQLite accounts, sessions, and buckets are **not migrated** automatically.
 
-1. Create a D1 database and replace the placeholder `database_id` in `wrangler.toml` with its ID:
+1. Fork this repository, then create a D1 database and replace `database_id` in `wrangler.toml` with its ID. The ID committed in this repository belongs to the upstream deployment and is not usable from another Cloudflare account:
 
    ```bash
    npx wrangler d1 create cookie-share-next

@@ -69,7 +69,7 @@ export function loadWorkerConfig(env: WorkerEnv): WorkerConfig {
     publicBaseUrl: required(env, "PUBLIC_BASE_URL").replace(/\/$/, ""),
     adminToken: required(env, "ADMIN_TOKEN"),
     allowedExtensionIds: extensionIds(env),
-    defaultQuotaBytes: integer(env, "DEFAULT_QUOTA_BYTES", 104857600),
+    defaultQuotaBytes: integer(env, "DEFAULT_QUOTA_BYTES", 10485760),
     defaultDailyRequestLimit: integer(env, "DEFAULT_DAILY_REQUEST_LIMIT", 1000),
     sessionTtlHours: integer(env, "SESSION_TTL_HOURS", 720),
     loginRateLimit: integer(env, "LOGIN_RATE_LIMIT", 10),

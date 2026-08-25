@@ -74,7 +74,7 @@ export function loadRuntimeConfig(): RuntimeConfig {
     publicBaseUrl,
     adminToken: requireString("ADMIN_TOKEN"),
     allowedExtensionIds: extensionIds(),
-    defaultQuotaBytes: optionalInt("DEFAULT_QUOTA_BYTES", 104857600),
+    defaultQuotaBytes: optionalInt("DEFAULT_QUOTA_BYTES", 10485760),
     defaultDailyRequestLimit: optionalInt("DEFAULT_DAILY_REQUEST_LIMIT", 1000),
     sessionTtlHours: optionalInt("SESSION_TTL_HOURS", 720),
     loginRateLimit: optionalInt("LOGIN_RATE_LIMIT", 10),

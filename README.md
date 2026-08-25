@@ -55,7 +55,7 @@ LINUXDO_CLIENT_SECRET=
 | `ADMIN_TOKEN` | required | Token required by the admin quota API. |
 | `ALLOWED_EXTENSION_IDS` | required in production | Comma-separated Chrome extension IDs allowed to receive OAuth results. The official extension ID is `kilogkcionjhdmmeafjogdhpoiocgaom`; self-hosters should use their own fixed extension ID. |
 | `PUBLIC_BASE_URL` | required | Public origin used for OAuth callbacks. |
-| `DEFAULT_QUOTA_BYTES` | `104857600` | Storage allowance for newly created accounts. |
+| `DEFAULT_QUOTA_BYTES` | `10485760` (10 MiB) | Storage allowance for newly created accounts. |
 | `DEFAULT_DAILY_REQUEST_LIMIT` | `1000` | Requests allowed per account per UTC day. |
 | `SESSION_TTL_HOURS` | `720` | Session lifetime. |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | optional pair | Enables GitHub OAuth. |
@@ -136,7 +136,7 @@ Keep `.env`, the database volume, and backups protected as sensitive service dat
 The service exposes an administrative quota API authenticated by `X-Admin-Token`:
 
 - `GET /api/v1/admin/users`
-- `PATCH /api/v1/admin/users/:id` with `{ "quotaBytes": 104857600, "dailyRequestLimit": 1000 }`
+- `PATCH /api/v1/admin/users/:id` with `{ "quotaBytes": 10485760, "dailyRequestLimit": 1000 }`
 
 ## Cloudflare Workers + D1 deployment
 

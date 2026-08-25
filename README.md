@@ -158,6 +158,16 @@ Workers is a separate deployment target with the same `/api/v1` HTTP contract as
 
    Configure at least one complete client ID/client-secret pair. Google and LinuxDo use the analogous `GOOGLE_*` and `LINUXDO_*` secret names. The non-secret quota, TTL, retention, and login-rate settings are under `[vars]` in `wrangler.toml`.
 
+   When using the Cloudflare dashboard's **Workers & Pages → Settings → Variables and Secrets** UI, use these binding types:
+
+   | Binding | Type |
+   | --- | --- |
+   | `PUBLIC_BASE_URL`, `GITHUB_CLIENT_ID`, `GOOGLE_CLIENT_ID`, `LINUXDO_CLIENT_ID` | Text |
+   | `ADMIN_TOKEN`, `GITHUB_CLIENT_SECRET`, `GOOGLE_CLIENT_SECRET`, `LINUXDO_CLIENT_SECRET` | Secret |
+   | `DEFAULT_QUOTA_BYTES`, `DEFAULT_DAILY_REQUEST_LIMIT`, `SESSION_TTL_HOURS`, `LOGIN_RATE_LIMIT`, `LOGIN_RATE_WINDOW_MIN`, `REQUEST_LOG_RETENTION_DAYS` | Text |
+
+   No binding in this application uses the JSON type. `DB` is not created in this UI: it is the D1 binding declared in `wrangler.toml`.
+
 4. Deploy:
 
    ```bash

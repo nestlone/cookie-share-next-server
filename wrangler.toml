@@ -1,4 +1,4 @@
-name = "cookie-share-next"
+name = "cookie-share-next-server"
 main = "src/worker/index.ts"
 compatibility_date = "2026-08-25"
 compatibility_flags = ["nodejs_compat"]

@@ -135,28 +135,13 @@ The service exposes an administrative quota API authenticated by `X-Admin-Token`
 
 Workers is a separate deployment target with the same `/api/v1` HTTP contract as the Node and Docker server. It uses D1 rather than the SQLite file, so existing SQLite accounts, sessions, and buckets are **not migrated** automatically.
 
-1. Fork this repository, then create a D1 database and replace `database_id` in `wrangler.toml` with its ID. The ID committed in this repository belongs to the upstream deployment and is not usable from another Cloudflare account:
+1. Fork this repository. In your fork, create a D1 database in the Cloudflare Dashboard, copy its ID, then replace `database_id` in `wrangler.toml`. The ID committed in this repository belongs to the upstream deployment and is not usable from another Cloudflare account.
 
-   ```bash
-   npx wrangler d1 create cookie-share-next
-   ```
+2. Connect the fork to **Cloudflare Workers & Pages** and deploy it from the Cloudflare Dashboard. Later pushes to your fork's `main` branch will then deploy automatically.
 
-2. Apply the versioned schema migration:
+3. In the D1 database's **Console** tab, paste and execute the complete contents of [`migrations/0001_initial.sql`](migrations/0001_initial.sql). This initializes the tables required by the Worker. Confirm that the D1 overview no longer reports zero tables before attempting sign-in.
 
-   ```bash
-   npm run worker:db:migrate
-   ```
-
-3. Put production secrets into Cloudflare. Do not commit them and do not upload `.env` as a Worker secret file:
-
-   ```bash
-   npx wrangler secret put PUBLIC_BASE_URL
-   npx wrangler secret put ADMIN_TOKEN
-   npx wrangler secret put GITHUB_CLIENT_ID
-   npx wrangler secret put GITHUB_CLIENT_SECRET
-   ```
-
-   Configure at least one complete client ID/client-secret pair. Google and LinuxDo use the analogous `GOOGLE_*` and `LINUXDO_*` secret names. The non-secret quota, TTL, retention, and login-rate settings are under `[vars]` in `wrangler.toml`.
+4. In the Worker dashboard's Variables and Secrets UI, configure at least one complete OAuth client pair. Do not commit secrets or upload `.env` files.
 
    When using the Cloudflare dashboard's **Workers & Pages → Settings → Variables and Secrets** UI, use these binding types:
 
@@ -166,13 +151,7 @@ Workers is a separate deployment target with the same `/api/v1` HTTP contract as
    | `ADMIN_TOKEN`, `GITHUB_CLIENT_SECRET`, `GOOGLE_CLIENT_SECRET`, `LINUXDO_CLIENT_SECRET` | Secret |
    | `DEFAULT_QUOTA_BYTES`, `DEFAULT_DAILY_REQUEST_LIMIT`, `SESSION_TTL_HOURS`, `LOGIN_RATE_LIMIT`, `LOGIN_RATE_WINDOW_MIN`, `REQUEST_LOG_RETENTION_DAYS` | Text |
 
-   No binding in this application uses the JSON type. `DB` is not created in this UI: it is the D1 binding declared in `wrangler.toml`.
-
-4. Deploy:
-
-   ```bash
-   npm run worker:deploy
-   ```
+   No binding in this application uses the JSON type. `DB` is not created in this UI: it is the D1 binding declared in `wrangler.toml`. This project sets `keep_vars = true`, so future Git-driven deployments preserve dashboard-configured text variables such as `PUBLIC_BASE_URL` and `GITHUB_CLIENT_ID`.
 
 For local Worker development, create an uncommitted `backend/.dev.vars` containing the same bindings, then run:
 

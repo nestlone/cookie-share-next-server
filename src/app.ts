@@ -1,5 +1,6 @@
 import type { ErrorRequestHandler, NextFunction, Request, RequestHandler, Response } from "express";
 import express from "express";
+import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { getMe, logout } from "./routes/auth";
 import { listUsers, requireAdmin, updateUserQuota } from "./routes/admin";
@@ -68,6 +69,7 @@ export function createApp(config: RuntimeConfig, db: DatabaseSync, configuredPro
   app.delete("/api/v1/buckets/:id", authRequired, userRateLimit, (request, response) => deleteBucket(request, response, buckets));
   app.get("/api/v1/admin/users", requireAdmin(config), (request, response) => listUsers(request, response, users, buckets));
   app.patch("/api/v1/admin/users/:id", requireAdmin(config), (request, response) => updateUserQuota(request, response, users));
+  app.use(express.static(path.join(config.serverRoot, "site"), { index: "index.html" }));
   app.use((_request, _response, next) => next(new HttpError(404, "Not Found", { success: false, message: "Not Found" })));
   const errorHandler: ErrorRequestHandler = (error, _request, response, next) => { if (response.headersSent) { next(error); return; } const httpError = buildError(error); sendJson(response, httpError.status, httpError.payload as ErrorPayload); };
   app.use(errorHandler);

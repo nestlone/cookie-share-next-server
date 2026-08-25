@@ -30,6 +30,7 @@ async function authUser(db: D1Database, user: UserRow) { const providers = await
 async function route(request: Request, env: WorkerEnv): Promise<Response> {
   if (request.method === "OPTIONS") return nocontent();
   const path = new URL(request.url).pathname;
+  if (!path.startsWith("/api/v1/")) return env.ASSETS.fetch(request);
   if (request.method === "GET" && path === "/api/v1/health") return json({ status: "ok", version: 1 });
   const config = loadWorkerConfig(env), configured = oauth(config);
   if (request.method === "GET" && path === "/api/v1/auth/providers") return json({ providers: [...configured.values()].map(({ id, name }) => ({ id, name })) });

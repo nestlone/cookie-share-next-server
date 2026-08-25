@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cookie Share Next — encrypted cookie buckets for Chromium browsers.">
+  <title>Cookie Share Next</title>
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="/"><img src="/assets/cookie-lock.svg" alt=""><span>Cookie Share Next</span></a><nav><a href="#how-it-works">How it works</a><a href="#security">Security</a><a class="button button--small" href="https://github.com/nestlone/cookie-share-next/releases">Get the extension</a></nav></header>
+  <main>
+    <section class="hero"><div class="hero-copy"><p class="eyebrow">OPEN SOURCE · CLIENT-SIDE ENCRYPTION</p><h1>Your cookies.<br><em>Your keys.</em></h1><p class="lede">Keep encrypted cookie buckets in sync across your authorized browsers. The server stores ciphertext only.</p><div class="actions"><a class="button" href="https://github.com/nestlone/cookie-share-next/releases">Download extension</a><a class="text-link" href="https://github.com/nestlone/cookie-share-next">View source →</a></div><p class="fine-print">Chromium extension · self-hostable API · no cookie plaintext on the server</p></div><div class="hero-art"><img src="/assets/cookie-lock.svg" alt="A cookie protected by a padlock"></div></section>
+    <section id="how-it-works" class="section"><p class="eyebrow">A SMALL, CLEAR WORKFLOW</p><h2>Three steps. No hidden sync.</h2><div class="steps"><article><span>01</span><h3>Sign in</h3><p>Choose any login method configured by your server.</p></article><article><span>02</span><h3>Unlock once</h3><p>Your vault password stays local to the extension session.</p></article><article><span>03</span><h3>Capture or apply</h3><p>Save a browser session to a bucket, or restore it when you need it.</p></article></div></section>
+    <section id="security" class="security"><div><p class="eyebrow">THE SECURITY MODEL</p><h2>Simple enough to inspect.</h2><p>Cookie values, bucket names, and vault passwords are encrypted in your browser. The service enforces account limits and stores opaque encrypted envelopes.</p><a class="text-link" href="https://github.com/nestlone/cookie-share-next-server#security-model">Read the protocol →</a></div><ul><li><strong>Local encryption</strong><span>Decryption happens in the extension.</span></li><li><strong>Encrypted directory</strong><span>Bucket names stay private while remaining fast to browse.</span></li><li><strong>Self-hostable</strong><span>Run the API with Node, Docker, or Cloudflare Workers + D1.</span></li></ul></section>
+  </main>
+  <footer><span>Cookie Share Next</span><span>Open source under GPL-3.0</span><a href="/api/v1/health">Service status</a></footer>
+</body>
+</html>

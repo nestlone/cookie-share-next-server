@@ -2,6 +2,8 @@
 
 Cookie Share Next Server is the self-hostable Node.js, Express, and SQLite backend for [Cookie Share Next](https://github.com/nestlone/cookie-share-next). It is an opaque storage service: bucket encryption and bucket passwords remain in the browser extension, while the server stores encrypted envelopes and enforces account quotas.
 
+The same deployment also serves the public portal at `/`; API traffic remains under `/api/v1/*`, so the portal, extension, and OAuth callback can share one origin.
+
 ## Security model
 
 Users authenticate through GitHub, Google, or LinuxDo OAuth. Provider identities are keyed by provider and subject; matching email addresses are never merged automatically. A signed-in user may manually link additional providers.

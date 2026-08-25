@@ -5,6 +5,10 @@ compatibility_flags = ["nodejs_compat"]
 # Preserve dashboard-managed text variables on Git-driven deployments.
 keep_vars = true
 
+[assets]
+directory = "./site"
+binding = "ASSETS"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "cookie-share-next"

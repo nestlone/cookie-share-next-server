@@ -2,6 +2,7 @@ import type { OAuthProviderConfig, OAuthProviderId } from "../types";
 
 export interface WorkerEnv {
   DB: D1Database;
+  ASSETS: Fetcher;
   PUBLIC_BASE_URL: string;
   ADMIN_TOKEN: string;
   GITHUB_CLIENT_ID?: string;

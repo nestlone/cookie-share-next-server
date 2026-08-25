@@ -2,8 +2,6 @@ import { HttpError } from "./errors";
 import type { EncryptedEnvelope } from "./types";
 
 const ID_PATTERN = /^[A-Za-z0-9]{1,64}$/;
-const USERNAME_PATTERN = /^[A-Za-z0-9_.-]{3,32}$/;
-const MIN_PASSWORD_LENGTH = 8;
 
 function badRequest(message: string): HttpError {
   return new HttpError(400, message, { success: false, message });
@@ -12,24 +10,6 @@ function badRequest(message: string): HttpError {
 export function validateId(value: unknown, message = "Invalid ID. Only letters and numbers are allowed."): string {
   if (typeof value !== "string" || !ID_PATTERN.test(value)) {
     throw badRequest(message);
-  }
-
-  return value;
-}
-
-export function validateUsername(value: unknown): string {
-  if (typeof value !== "string" || !USERNAME_PATTERN.test(value)) {
-    throw badRequest(
-      "Invalid username. Use 3-32 characters: letters, numbers, underscore, dot, hyphen.",
-    );
-  }
-
-  return value;
-}
-
-export function validatePassword(value: unknown): string {
-  if (typeof value !== "string" || value.length < MIN_PASSWORD_LENGTH) {
-    throw badRequest("Password must be at least 8 characters long.");
   }
 
   return value;

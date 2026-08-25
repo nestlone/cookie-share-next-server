@@ -9,6 +9,7 @@ export interface OAuthProviderConfig {
 
 export interface RuntimeConfig {
   host: string;
+  trustProxy: boolean;
   port: number;
   serverRoot: string;
   dbPath: string;

@@ -52,7 +52,7 @@ export function createApp(config: RuntimeConfig, db: DatabaseSync, configuredPro
   const userRateLimit = dailyRateLimit(requestLog, users);
   const app = express();
   app.disable("x-powered-by");
-  app.set("trust proxy", 1);
+  app.set("trust proxy", config.trustProxy);
   app.use((request, response, next) => {
     applySecurityHeaders(response);
     applyCorsHeaders(response);

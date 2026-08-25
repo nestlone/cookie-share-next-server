@@ -24,6 +24,14 @@ function optionalInt(name: string, fallback: number): number {
   return parsed;
 }
 
+function optionalBoolean(name: string, fallback: boolean): boolean {
+  const value = process.env[name]?.trim().toLowerCase();
+  if (!value) return fallback;
+  if (value === "true" || value === "1") return true;
+  if (value === "false" || value === "0") return false;
+  throw new HttpError(500, `Invalid ${name}`, { success: false, error: `Invalid ${name}` }, { plain: true });
+}
+
 function extensionIds(): string[] {
   const raw = process.env.ALLOWED_EXTENSION_IDS?.trim() ?? "";
   if (!raw) return [];
@@ -59,6 +67,7 @@ export function loadRuntimeConfig(): RuntimeConfig {
   if (oauthProviders.length === 0) throw new HttpError(500, "Configure at least one OAuth provider", { success: false, error: "Configure at least one OAuth provider" }, { plain: true });
   return {
     host: optionalString("HOST", "0.0.0.0"),
+    trustProxy: optionalBoolean("TRUST_PROXY", false),
     port: resolvePort(),
     serverRoot: SERVER_ROOT,
     dbPath: resolveDbPath(optionalString("DB_PATH", "./data/cookie-share-next.db")),

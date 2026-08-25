@@ -49,6 +49,7 @@ LINUXDO_CLIENT_SECRET=
 | Variable | Default | Description |
 | --- | ---: | --- |
 | `HOST` | `0.0.0.0` | HTTP listen host. |
+| `TRUST_PROXY` | `false` | Set `true` only behind a trusted reverse proxy; enables proxy client-IP handling for login rate limits. |
 | `PORT` | `3000` | HTTP listen port. |
 | `DB_PATH` | `./data/cookie-share-next.db` | SQLite database path. |
 | `ADMIN_TOKEN` | required | Token required by the admin quota API. |

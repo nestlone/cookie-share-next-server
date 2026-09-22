@@ -2,13 +2,14 @@ import type { ErrorRequestHandler, NextFunction, Request, RequestHandler, Respon
 import express from "express";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { getMe, logout } from "./routes/auth";
+import { exchangeBackupKey, getMe, logout, resetBackupKey } from "./routes/auth";
 import { listUsers, requireAdmin, updateUserQuota } from "./routes/admin";
 import { createBucket, deleteBucket, getBucket, listBuckets, updateBucket } from "./routes/buckets";
 import { exchangeOAuth, listProviders, oauthCallback, startOAuth, unlinkOAuth } from "./routes/oauth";
 import { HttpError } from "./errors";
 import { applyCorsHeaders, applyCorsOrigin, applySecurityHeaders, sendCorsPreflight, sendJson } from "./http";
-import { adminRateLimit, dailyRateLimit, loginRateLimit, requireAuth } from "./middleware";
+import { adminRateLimit, backupKeyRateLimit, dailyRateLimit, loginRateLimit, requireAuth } from "./middleware";
+import { BackupKeyStore } from "./store/backup-keys";
 import { createProvider, type OAuthProvider } from "./oauth/providers";
 import { ensureSchema } from "./schema";
 import { BucketStore } from "./store/buckets";
@@ -38,6 +39,7 @@ function buildError(error: unknown): HttpError {
 export function createApp(config: RuntimeConfig, db: DatabaseSync, configuredProviders?: OAuthProvider[]): express.Express {
   ensureSchema(db);
   const users = new UserStore(db);
+  const backupKeys = new BackupKeyStore(db);
   const sessions = new SessionStore(db, config.sessionTtlHours);
   const buckets = new BucketStore(db);
   const accounts = new ProviderAccountStore(db);
@@ -49,6 +51,7 @@ export function createApp(config: RuntimeConfig, db: DatabaseSync, configuredPro
   requestLog.pruneOlderThan(new Date(Date.now() - config.requestLogRetentionDays * 86_400_000).toISOString());
   const authRequired = requireAuth(sessions);
   const authRateLimit = loginRateLimit(config);
+  const backupKeyExchangeRateLimit = backupKeyRateLimit();
   const adminRequestRateLimit = adminRateLimit(config);
   const userRateLimit = dailyRateLimit(requestLog, users);
   const app = express();
@@ -67,6 +70,8 @@ export function createApp(config: RuntimeConfig, db: DatabaseSync, configuredPro
   app.post("/api/v1/auth/oauth/:provider/start", authRateLimit, (request, response) => startOAuth(request, response, config, sessions, states, providers));
   app.get("/api/v1/auth/oauth/:provider/callback", authRateLimit, handleRoute((request, response) => oauthCallback(request, response, config, users, accounts, states, exchanges, providers)));
   app.post("/api/v1/auth/oauth/exchange", authRateLimit, (request, response) => exchangeOAuth(request, response, users, accounts, exchanges, sessions));
+  app.post("/api/v1/auth/backup-key/exchange", backupKeyExchangeRateLimit, (request, response) => exchangeBackupKey(request, response, backupKeys, users, accounts, sessions));
+  app.post("/api/v1/auth/backup-key/reset", authRequired, (request, response) => resetBackupKey(request, response, backupKeys));
   app.delete("/api/v1/auth/oauth/:provider", authRequired, (request, response) => unlinkOAuth(request, response, accounts));
   app.post("/api/v1/auth/logout", authRequired, (request, response) => logout(request, response, sessions));
   app.get("/api/v1/me", authRequired, userRateLimit, (request, response) => getMe(request, response, users, accounts, buckets, requestLog));

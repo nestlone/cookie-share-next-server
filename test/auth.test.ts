@@ -51,6 +51,32 @@ describe("OAuth authentication", () => {
     expect((await requestJson(testServer.baseUrl, "/auth/oauth/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) })).response.status).toBe(401);
   });
 
+  it("resets a backup key, exchanges it for a session, and revokes the old key", async () => {
+    testServer = await createTestServer();
+    const token = await signIn(testServer.baseUrl);
+    const reset = await requestJson(testServer.baseUrl, "/auth/backup-key/reset", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+    expect(reset.response.status).toBe(200);
+    const key = reset.body?.key as string;
+    expect(key).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    const exchanged = await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key }) });
+    expect(exchanged.response.status).toBe(200);
+    expect(exchanged.body?.user).toMatchObject({ displayName: "alice" });
+    const replacement = await requestJson(testServer.baseUrl, "/auth/backup-key/reset", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+    expect(replacement.response.status).toBe(200);
+    expect((await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key }) })).response.status).toBe(401);
+  });
+
+  it("limits backup-key exchanges to three attempts per IP per minute", async () => {
+    testServer = await createTestServer();
+    const token = await signIn(testServer.baseUrl);
+    const reset = await requestJson(testServer.baseUrl, "/auth/backup-key/reset", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+    const key = reset.body?.key as string;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      expect((await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "invalid" }) })).response.status).toBe(401);
+    }
+    expect((await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key }) })).response.status).toBe(429);
+  });
+
   it("only permits OAuth result redirects for explicitly allowed extension IDs", async () => {
     const allowedId = "abcdefghijklmnopabcdefghijklmnop";
     testServer = await createTestServer({ publicBaseUrl: "https://service.example", allowedExtensionIds: [allowedId] });

@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { HttpError } from "../errors";
 import { sendJson, sendNoContent } from "../http";
 import type { BucketStore } from "../store/buckets";
+import type { BackupKeyStore } from "../store/backup-keys";
 import type { ProviderAccountStore } from "../store/provider-accounts";
 import type { RequestLogStore } from "../store/request-log";
 import type { SessionStore } from "../store/sessions";
@@ -26,6 +27,22 @@ export function logout(request: Request, response: Response, sessions: SessionSt
   const authHeader = request.header("Authorization");
   if (authHeader?.startsWith("Bearer ")) sessions.delete(authHeader.slice(7));
   sendNoContent(response);
+}
+
+export function resetBackupKey(request: Request, response: Response, backupKeys: BackupKeyStore): void {
+  if (request.userId === undefined) throw new HttpError(401, "Unauthorized", { success: false, message: "Unauthorized" });
+  sendJson(response, 200, { key: backupKeys.reset(request.userId) });
+}
+
+export function exchangeBackupKey(request: Request, response: Response, backupKeys: BackupKeyStore, users: UserStore, accounts: ProviderAccountStore, sessions: SessionStore): void {
+  const key = request.body?.key;
+  const userId = typeof key === "string" ? backupKeys.findUserId(key) : undefined;
+  const user = userId === undefined ? undefined : users.findById(userId);
+  if (!user) throw new HttpError(401, "Invalid backup key", { success: false, message: "Invalid backup key" });
+  sendJson(response, 200, {
+    token: sessions.create(user.id),
+    user: toAuthUser({ id: user.id, displayName: user.display_name, quotaBytes: user.quota_bytes, dailyRequestLimit: user.daily_request_limit, created_at: user.created_at, updated_at: user.updated_at }, accounts),
+  });
 }
 
 export function getMe(request: Request, response: Response, users: UserStore, accounts: ProviderAccountStore, buckets: BucketStore, requestLog: RequestLogStore): void {

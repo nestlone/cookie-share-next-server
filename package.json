@@ -1,7 +1,7 @@
 {
   "name": "cookie-share-next-server",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cookie-share-next zero-knowledge self-hosted backend",
   "main": "dist/index.js",
   "engines": {

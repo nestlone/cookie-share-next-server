@@ -31,7 +31,7 @@ export function requireAuth(sessions: SessionStore) {
 /**
  * Login rate limiter: in-memory per-IP burst protection.
  */
-function ipRateLimit(config: RuntimeConfig, message: string) {
+function ipRateLimit(config: Pick<RuntimeConfig, "loginRateLimit" | "loginRateWindowMin">, message: string) {
   const attempts = new Map<string, number[]>();
   const limit = config.loginRateLimit;
   const windowMs = config.loginRateWindowMin * 60_000;
@@ -74,6 +74,11 @@ function ipRateLimit(config: RuntimeConfig, message: string) {
 
 export function loginRateLimit(config: RuntimeConfig) {
   return ipRateLimit(config, "Too many login attempts. Try again later.");
+}
+
+/** Backup keys have a deliberately tighter, fixed public login limit. */
+export function backupKeyRateLimit() {
+  return ipRateLimit({ loginRateLimit: 3, loginRateWindowMin: 1 }, "Too many backup-key attempts. Try again later.");
 }
 
 export function adminRateLimit(config: RuntimeConfig) {

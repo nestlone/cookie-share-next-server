@@ -24,6 +24,12 @@ export const SCHEMA_STATEMENTS: string[] = [
     expires_at  TEXT    NOT NULL
   )`,
   `CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id)`,
+  `CREATE TABLE IF NOT EXISTS backup_keys (
+    user_id    INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    key_hash   TEXT    NOT NULL UNIQUE,
+    created_at TEXT    NOT NULL,
+    updated_at TEXT    NOT NULL
+  )`,
   `CREATE TABLE IF NOT EXISTS oauth_states (
     state         TEXT PRIMARY KEY,
     provider      TEXT NOT NULL,

@@ -17,7 +17,22 @@ jobs:
   deploy:
     name: Deploy Worker and public site
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
+      - name: Check deployment credentials
+        shell: bash
+        run: |
+          if [[ -z "$CLOUDFLARE_API_TOKEN" ]]; then
+            echo "::error::Add CLOUDFLARE_API_TOKEN in Settings > Secrets and variables > Actions > Secrets."
+            exit 1
+          fi
+          if [[ -z "$CLOUDFLARE_ACCOUNT_ID" ]]; then
+            echo "::error::Add CLOUDFLARE_ACCOUNT_ID in Settings > Secrets and variables > Actions > Variables (or Secrets)."
+            exit 1
+          fi
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -32,6 +47,3 @@ jobs:
           npm test
       - name: Deploy Worker and static pages
         run: npm run worker:deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

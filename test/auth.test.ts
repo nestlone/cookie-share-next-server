@@ -1,10 +1,26 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { createTestServer, FakeProvider, followAuthorization, requestJson, signIn, type TestServer } from "./helpers";
 
 let testServer: TestServer | undefined;
 afterEach(async () => { await testServer?.close(); testServer = undefined; });
 
 describe("OAuth authentication", () => {
+  it("accepts both configured official identities while rejecting other extensions", async () => {
+    const config = readFileSync("wrangler.toml", "utf8");
+    const allowedExtensionIds = config.match(/^ALLOWED_EXTENSION_IDS = "([^"]+)"/m)![1]!.split(",");
+    expect(allowedExtensionIds).toContain("lakmdllikmnehpebnphhemkcedkgkfpj");
+    expect(allowedExtensionIds).toContain("kilogkcionjhdmmeafjogdhpoiocgaom");
+    testServer = await createTestServer({ publicBaseUrl: "https://cookie.nestlone.com", allowedExtensionIds });
+    for (const id of [...allowedExtensionIds, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]) {
+      const { response } = await requestJson(testServer.baseUrl, "/auth/oauth/github/start", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "login", redirectUri: `https://${id}.chromiumapp.org/` }),
+      });
+      expect(response.status).toBe(allowedExtensionIds.includes(id) ? 200 : 400);
+    }
+  });
+
   it("signs in, reads a profile, and logs out", async () => {
     testServer = await createTestServer();
     const token = await signIn(testServer.baseUrl);

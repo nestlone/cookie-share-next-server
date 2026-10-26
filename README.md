@@ -35,7 +35,7 @@ Edit `.env` before starting. Set a long random `ADMIN_TOKEN`, the public HTTPS o
 ```dotenv
 PUBLIC_BASE_URL=https://cookie.nestlone.com
 ADMIN_TOKEN=replace-with-a-long-random-secret
-ALLOWED_EXTENSION_IDS=kilogkcionjhdmmeafjogdhpoiocgaom
+ALLOWED_EXTENSION_IDS=lakmdllikmnehpebnphhemkcedkgkfpj,kilogkcionjhdmmeafjogdhpoiocgaom
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
 GOOGLE_CLIENT_ID=
@@ -55,7 +55,7 @@ LINUXDO_CLIENT_SECRET=
 | `PORT` | `3000` | HTTP listen port. |
 | `DB_PATH` | `./data/cookie-share-next.db` | SQLite database path. |
 | `ADMIN_TOKEN` | required | Token required by the admin quota API. |
-| `ALLOWED_EXTENSION_IDS` | required in production | Comma-separated Chrome extension IDs allowed to receive OAuth results. The official extension ID is `kilogkcionjhdmmeafjogdhpoiocgaom`; self-hosters should use their own fixed extension ID. |
+| `ALLOWED_EXTENSION_IDS` | required in production | Comma-separated Chrome extension IDs allowed to receive OAuth results. The Chrome Web Store ID is `lakmdllikmnehpebnphhemkcedkgkfpj`; `kilogkcionjhdmmeafjogdhpoiocgaom` remains allowed for older unpacked releases. Self-hosters should use the extension IDs they operate. |
 | `PUBLIC_BASE_URL` | required | Public origin used for OAuth callbacks. |
 | `DEFAULT_QUOTA_BYTES` | `10485760` (10 MiB) | Storage allowance for newly created accounts. |
 | `DEFAULT_DAILY_REQUEST_LIMIT` | `1000` | Requests allowed per account per UTC day. |
@@ -171,7 +171,7 @@ npm run worker:db:migrate:local
 npm run worker:dev
 ```
 
-`PUBLIC_BASE_URL` must be the externally visible Worker origin. Register each provider callback as `<PUBLIC_BASE_URL>/api/v1/auth/oauth/<provider>/callback`. Set `ALLOWED_EXTENSION_IDS` before enabling OAuth. The released official extension has ID `kilogkcionjhdmmeafjogdhpoiocgaom`, including when loaded unpacked from the release ZIP. A daily Worker cron removes expired sessions, OAuth records, login-attempt records, and retained request logs. D1 and Workers service limits apply; the quota values in this application are logical ciphertext-storage limits, not a reservation of D1 capacity.
+`PUBLIC_BASE_URL` must be the externally visible Worker origin. Register each provider callback as `<PUBLIC_BASE_URL>/api/v1/auth/oauth/<provider>/callback`. Set `ALLOWED_EXTENSION_IDS` before enabling OAuth. From extension version 0.0.14, the official store and unpacked releases use `lakmdllikmnehpebnphhemkcedkgkfpj`. Older unpacked releases use `kilogkcionjhdmmeafjogdhpoiocgaom`; the official deployment accepts both during migration. A daily Worker cron removes expired sessions, OAuth records, login-attempt records, and retained request logs. D1 and Workers service limits apply; the quota values in this application are logical ciphertext-storage limits, not a reservation of D1 capacity.
 
 ## Development
 

@@ -148,6 +148,8 @@ Workers is a separate deployment target with the same `/api/v1` HTTP contract as
 
 2. Connect the fork to **Cloudflare Workers & Pages** and deploy it from the Cloudflare Dashboard. Later pushes to your fork's `main` branch will then deploy automatically.
 
+   This repository also includes [`.github/workflows/deploy-worker.yml`](.github/workflows/deploy-worker.yml) for direct GitHub Actions deployment. Add repository secrets named `CLOUDFLARE_API_TOKEN` (Workers Scripts and D1 permissions) and `CLOUDFLARE_ACCOUNT_ID`; every successful push to `main` will then validate and deploy the Worker together with all files under `site/`. Use either this workflow or Cloudflare's Git integration as the single production deploy path.
+
 3. In the D1 database's **Console** tab, paste and execute the complete contents of [`migrations/0001_initial.sql`](migrations/0001_initial.sql). This initializes the tables required by the Worker. Confirm that the D1 overview no longer reports zero tables before attempting sign-in.
 
 4. In the Worker dashboard's Variables and Secrets UI, configure at least one complete OAuth client pair. Do not commit secrets or upload `.env` files.

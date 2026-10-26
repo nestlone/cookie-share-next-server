@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How Cookie Share Next saves, encrypts, synchronizes, and restores authorized browser account states.">
+  <title>How it works · Cookie Share Next</title>
+  <link rel="canonical" href="https://cookie.nestlone.com/how-it-works/">
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="/"><img src="/assets/cookie-lock.svg" alt=""><span>Cookie Share Next</span></a><nav><a href="/how-it-works/" aria-current="page">How it works</a><a href="/security/">Security</a><a href="/privacy/">Privacy</a><a class="button button--small" href="https://github.com/nestlone/cookie-share-next/releases">Get the extension</a></nav></header>
+  <main class="content-page">
+    <section class="page-hero"><p class="eyebrow">A DELIBERATE, USER-INITIATED WORKFLOW</p><h1>How it<br><em>works.</em></h1><p>Cookie Share Next acts only when you ask it to save or switch an account. Encryption happens before synchronization, and decryption stays in your browser.</p></section>
+    <section class="process-grid" aria-label="Account workflow">
+      <article><span>01</span><h2>Sign in to the service</h2><p>Choose an OAuth provider configured by the server, or use a backup login key that you previously generated. Authentication opens access to your encrypted buckets; it does not reveal their contents.</p></article>
+      <article><span>02</span><h2>Unlock your vault</h2><p>Enter the vault password locally in the extension. The password derives the encryption keys in your browser and is never sent to the service.</p></article>
+      <article><span>03</span><h2>Save an account</h2><p>On the active website, choose “Save current account.” The extension captures the permitted cookies and same-origin local/session storage needed for that website's login state.</p></article>
+      <article><span>04</span><h2>Encrypt before upload</h2><p>The extension encrypts the account-state payload and its private label. Only the encrypted envelope, an opaque ID, size, and timestamps reach the server.</p></article>
+      <article><span>05</span><h2>Switch when needed</h2><p>Choose a saved account for the current site. The extension replaces that site's cookies and local browser state, then reloads the active tab so the selected session can take effect.</p></article>
+      <article><span>06</span><h2>Stay in control</h2><p>Rename, export, or delete individual entries from Settings. You can also delete all encrypted buckets, reset a backup key, sign out, or use your own compatible server.</p></article>
+    </section>
+    <aside class="next-page"><p class="eyebrow">NEXT</p><h2>See where the trust boundary sits.</h2><a class="button" href="/security/">Read the security model</a></aside>
+  </main>
+  <footer><span>Cookie Share Next</span><span>Open source under GPL-3.0</span><span><a href="/">Home</a> · <a href="/how-it-works/" aria-current="page">How it works</a> · <a href="/security/">Security</a> · <a href="/privacy/">Privacy</a></span></footer>
+</body>
+</html>

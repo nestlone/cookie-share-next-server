@@ -6,11 +6,21 @@ const root = path.resolve(import.meta.dirname, "..");
 const page = readFileSync(path.join(root, "site/privacy/index.html"), "utf8");
 const chinesePage = readFileSync(path.join(root, "site/privacy/zh/index.html"), "utf8");
 const home = readFileSync(path.join(root, "site/index.html"), "utf8");
+const howItWorks = readFileSync(path.join(root, "site/how-it-works/index.html"), "utf8");
+const security = readFileSync(path.join(root, "site/security/index.html"), "utf8");
 const policy = readFileSync(path.join(root, "PRIVACY.md"), "utf8");
 
 describe("public privacy policy", () => {
   it("is linked from the public portal", () => {
     expect(home).toContain('href="/privacy/"');
+  });
+
+  it("uses real pages rather than in-page navigation", () => {
+    expect(home).toContain('href="/how-it-works/"');
+    expect(home).toContain('href="/security/"');
+    expect(home).not.toContain('href="#');
+    expect(howItWorks).toContain("Encrypt before upload");
+    expect(security).toContain("Plaintext stays client-side");
   });
 
   it("publishes separate English and Chinese policy pages", () => {

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cookie Share Next security model: client-side encryption, server-visible metadata, authentication, and deployment boundaries.">
+  <title>Security model · Cookie Share Next</title>
+  <link rel="canonical" href="https://cookie.nestlone.com/security/">
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="/"><img src="/assets/cookie-lock.svg" alt=""><span>Cookie Share Next</span></a><nav><a href="/how-it-works/">How it works</a><a href="/security/" aria-current="page">Security</a><a href="/privacy/">Privacy</a><a class="button button--small" href="https://github.com/nestlone/cookie-share-next-server">View source</a></nav></header>
+  <main class="content-page">
+    <section class="page-hero page-hero--security"><p class="eyebrow">AN INSPECTABLE TRUST BOUNDARY</p><h1>Security<br><em>model.</em></h1><p>The official service authenticates users, enforces quotas, and stores encrypted envelopes. Sensitive account-state contents are encrypted and decrypted by the extension.</p></section>
+    <section class="boundary" aria-label="Security boundary">
+      <article class="boundary-card boundary-card--browser"><p class="eyebrow">IN YOUR BROWSER</p><h2>Plaintext stays client-side</h2><ul><li>Vault password and derived decryption keys</li><li>Cookie values and saved Web Storage</li><li>Private bucket names and decrypted account state</li><li>Import and export validation</li></ul></article>
+      <div class="boundary-arrow" aria-hidden="true"><span>encrypted envelopes</span><b>⇄</b><span>HTTPS</span></div>
+      <article class="boundary-card boundary-card--server"><p class="eyebrow">ON THE SERVICE</p><h2>Opaque storage and controls</h2><ul><li>Encrypted envelopes and opaque bucket IDs</li><li>Ciphertext sizes and timestamps</li><li>OAuth identity links and hashed service tokens</li><li>Quotas, rate limits, and short-lived security records</li></ul></article>
+    </section>
+    <section class="assurance-grid"><article><span>01</span><h2>Authenticated access</h2><p>OAuth uses PKCE and short-lived, single-use exchange codes. Backup keys are random and stored as hashes. Extension callback destinations are restricted to configured extension IDs.</p></article><article><span>02</span><h2>Compartmentalized secrets</h2><p>OAuth client secrets and the administrative token are Worker secrets, not extension code. The service never receives the vault password or derived vault keys.</p></article><article><span>03</span><h2>Open implementation</h2><p>The extension, protocol, server, migrations, tests, and deployment configuration are available for inspection. Self-hosters can operate the same API with their own identity providers and storage.</p></article></section>
+    <div class="security-caveat"><strong>What encryption does not hide</strong><p>The service can still observe the service-account identity, bucket count, approximate ciphertext sizes, API endpoints, request timing, and short-lived IP data used for abuse prevention. Review the privacy policy for retention and user choices.</p></div>
+    <aside class="next-page"><p class="eyebrow">FULL DISCLOSURE</p><h2>Read the data-handling details.</h2><div class="actions"><a class="button" href="/privacy/">Privacy policy</a><a class="text-link" href="https://github.com/nestlone/cookie-share-next-server/blob/main/docs/protocol.md">Protocol and threat model →</a></div></aside>
+  </main>
+  <footer><span>Cookie Share Next</span><span>Open source under GPL-3.0</span><span><a href="/">Home</a> · <a href="/how-it-works/">How it works</a> · <a href="/security/" aria-current="page">Security</a> · <a href="/privacy/">Privacy</a></span></footer>
+</body>
+</html>

@@ -4,6 +4,8 @@ Cookie Share Next Server is the self-hostable Node.js, Express, and SQLite backe
 
 The same deployment also serves the public portal at `/`; API traffic remains under `/api/v1/*`, so the portal, extension, and OAuth callback can share one origin.
 
+The browser-readable privacy policy is served at `/privacy/`, with the reviewable source maintained in [`PRIVACY.md`](PRIVACY.md). The official deployment URL is `https://cookie.nestlone.com/privacy/`.
+
 ## Security model
 
 Users authenticate through GitHub, Google, or LinuxDo OAuth. Provider identities are keyed by provider and subject; matching email addresses are never merged automatically. A signed-in user may manually link additional providers.

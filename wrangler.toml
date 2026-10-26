@@ -1,6 +1,6 @@
 name = "cookie-share-next-server"
 main = "src/worker/index.ts"
-compatibility_date = "2026-08-25"
+compatibility_date = "2026-10-26"
 compatibility_flags = ["nodejs_compat"]
 # Preserve dashboard-managed text variables on Git-driven deployments.
 keep_vars = true

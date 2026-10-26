@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cookie Share Next privacy policy — what the extension accesses, how encrypted data is handled, and how users control it.">
+  <title>Privacy Policy · Cookie Share Next</title>
+  <link rel="canonical" href="https://cookie.nestlone.com/privacy/">
+  <link rel="alternate" hreflang="en" href="https://cookie.nestlone.com/privacy/">
+  <link rel="alternate" hreflang="zh-CN" href="https://cookie.nestlone.com/privacy/zh/">
+  <link rel="alternate" hreflang="x-default" href="https://cookie.nestlone.com/privacy/">
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body>
+  <header class="site-header legal-header">
+    <a class="brand" href="/"><img src="/assets/cookie-lock.svg" alt=""><span>Cookie Share Next</span></a>
+    <nav aria-label="Privacy policy navigation"><a href="/">Home</a><a href="/privacy/zh/" lang="zh-CN">中文版</a><a class="button button--small" href="https://github.com/nestlone/cookie-share-next-server/blob/main/PRIVACY.md">View source</a></nav>
+  </header>
+  <main class="legal-page">
+    <section class="legal-hero">
+      <div><p class="eyebrow">PRIVACY · TRANSPARENCY · USER CONTROL</p><h1>Privacy<br><em>Policy</em></h1><p class="legal-updated">Effective and last updated: October 26, 2026</p></div>
+      <aside class="legal-summary" aria-label="Policy summary"><strong>The short version</strong><p>Your browser state is accessed only for account features you request. Sensitive account-state contents are encrypted in the extension before synchronization. We do not sell data or use it for advertising.</p></aside>
+    </section>
+
+    <div class="legal-notice"><strong>Scope</strong><p>This policy applies to the Cookie Share Next browser extension and the official service at <code>https://cookie.nestlone.com</code>. Self-hosted deployments are operated by their own administrators and may have additional policies.</p></div>
+
+    <article class="legal-document">
+      <p class="eyebrow">FULL POLICY</p><h2>How your information is handled</h2>
+      <section><span class="legal-number">01</span><div><h3>Purpose</h3><p>Cookie Share Next lets you save and switch authorized website login states across your browsers. The extension reads a login state only when you ask it to save or switch an account. Sensitive browser state is encrypted in the extension before synchronization. The service stores encrypted envelopes and cannot decrypt their contents.</p></div></section>
+      <section><span class="legal-number">02</span><div><h3>Data the extension accesses</h3><p>When needed for a feature you request, the extension may access:</p><ul><li>the active tab's URL, hostname, title, and icon to identify the current site;</li><li>cookies for the current site, including HTTPOnly and partitioned cookies where Chromium grants access;</li><li>same-origin <code>localStorage</code> and <code>sessionStorage</code> for the current site;</li><li>extension settings, the server address, extension login session, and local encryption state;</li><li>files you explicitly import or export as account backups.</li></ul><p>The extension does not continuously scan tabs, collect browsing history, inject advertising, or use this data for profiling.</p></div></section>
+      <section><span class="legal-number">03</span><div><h3>Data received by the official service</h3><ul><li>OAuth provider, provider-specific account identifier, and login/display name. For Google sign-in, this may be the email address returned by Google.</li><li>Encrypted account buckets, opaque bucket identifiers, ciphertext sizes, and timestamps.</li><li>Cryptographic hashes of service session tokens and backup login keys. A plaintext backup key is displayed once and is not stored by the service.</li><li>Short-lived OAuth state and exchange records.</li><li>Account ID, API endpoint, and timestamp records used for request limits and security.</li><li>The requesting IP address for short-lived login rate limiting and abuse prevention.</li><li>Technical request metadata processed by Cloudflare while delivering and protecting the service.</li></ul><p>OAuth access tokens are used transiently to request the minimum identity information and are not stored by Cookie Share Next.</p></div></section>
+      <section><span class="legal-number">04</span><div><h3>How data is used</h3><p>We use data only to authenticate users, link providers at the user's request, synchronize encrypted buckets, enforce quotas, prevent abuse, maintain security, diagnose operational failures, and provide requested import, export, switching, and deletion features.</p><p><strong>We do not sell personal data.</strong> We do not use or transfer user data for personalized advertising, retargeting, credit decisions, or unrelated analytics. Humans cannot read decrypted cookies or browser storage because the service does not possess the vault password or decryption keys.</p></div></section>
+      <section><span class="legal-number">05</span><div><h3>Encryption and security</h3><p>Cookie values, saved browser storage, bucket names, and related account-state contents are encrypted inside the extension before upload. Vault passwords and derived decryption keys remain in the extension. The official service receives only encrypted envelopes for those contents, and network communication uses HTTPS.</p><p>No system can guarantee absolute security. Protect exported files, vault passwords, backup login keys, OAuth accounts, and devices with access to the extension.</p></div></section>
+      <section><span class="legal-number">06</span><div><h3>Service providers and disclosures</h3><ul><li><strong>Cloudflare</strong> hosts and protects the official Worker service and D1 database and processes network and infrastructure metadata.</li><li><strong>GitHub, Google, or LinuxDo</strong> processes authentication when you choose that provider, under its own privacy policy.</li><li><strong>A user-selected self-hosted server</strong> receives encrypted bucket data when configured by the user; its operator controls that deployment.</li></ul><p>We may disclose information when required by applicable law or when reasonably necessary to protect users, the service, or the public from security threats or abuse.</p></div></section>
+      <section><span class="legal-number">07</span><div><h3>Retention</h3><ul><li>Encrypted buckets remain until you delete them or the account is deleted.</li><li>OAuth links and basic account metadata remain while the service account exists.</li><li>Sessions and temporary OAuth records expire according to service configuration and are periodically removed.</li><li>Login-attempt IP records are retained only for rate limiting and periodically purged after the protection window.</li><li>API request-limit records are normally retained for seven days on the official service.</li><li>Local extension data remains until cleared or the extension is uninstalled. Exported files remain where you saved them.</li></ul></div></section>
+      <section><span class="legal-number">08</span><div><h3>Your choices and deletion</h3><p>You can delete individual or all encrypted buckets, unlink an additional OAuth provider, sign out, reset a backup key, remove local extension data, and uninstall the extension. Uninstalling does not automatically delete server-side data or exported files.</p><p>To request deletion of remaining official-service identity and server records, use the repository's private security-reporting channel. Never post cookies, tokens, backup keys, database exports, or other sensitive information in a public issue.</p></div></section>
+      <section><span class="legal-number">09</span><div><h3>Children</h3><p>Cookie Share Next is not directed to children under 13, and we do not knowingly collect personal information from children under 13.</p></div></section>
+      <section><span class="legal-number">10</span><div><h3>Chrome Web Store Limited Use</h3><p>Cookie Share Next's use and transfer of information received from Google APIs adheres to the Chrome Web Store User Data Policy, including the Limited Use requirements. Data obtained through extension permissions is used only to provide or improve the disclosed, user-facing account-state management features.</p></div></section>
+      <section><span class="legal-number">11</span><div><h3>Changes and contact</h3><p>Material changes will be published at this URL with an updated date. Privacy questions or requests may be submitted through the private security-reporting channel of the <a href="https://github.com/nestlone/cookie-share-next-server/security">server repository</a>. Public issues may be used for general, non-sensitive questions only.</p></div></section>
+    </article>
+
+  </main>
+  <footer><span>Cookie Share Next</span><span>Open source under GPL-3.0</span><span><a href="/">Home</a> · <a href="/privacy/" aria-current="page">Privacy</a> · <a href="/api/v1/health">Service status</a></span></footer>
+</body>
+</html>

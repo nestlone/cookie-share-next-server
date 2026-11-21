@@ -24,6 +24,10 @@ export class BackupKeyStore {
     return row?.user_id;
   }
 
+  public has(userId: number): boolean {
+    return Boolean(this.db.prepare("SELECT 1 FROM backup_keys WHERE user_id = ?").get(userId));
+  }
+
   private hash(key: string): string {
     return crypto.createHash("sha256").update(key).digest("hex");
   }

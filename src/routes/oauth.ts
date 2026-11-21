@@ -86,9 +86,9 @@ export async function oauthCallback(request: Request, response: Response, config
     return;
   }
   if (state.mode === "link") {
-    const existing = accounts.find(providerIdValue, identity.subject);
-    if (existing && existing.user_id !== state.userId) { redirect(response, state.redirectUri, { error: "provider_already_linked" }); return; }
-    if (!existing) accounts.create(state.userId as number, providerIdValue, identity.subject, identity.login);
+    if (state.userId === undefined || !users.findById(state.userId)) { redirect(response, state.redirectUri, { error: "account_not_found" }); return; }
+    const conflict = accounts.link(state.userId, providerIdValue, identity.subject, identity.login);
+    if (conflict) { redirect(response, state.redirectUri, { error: conflict }); return; }
     redirect(response, state.redirectUri, { linked: "1" });
     return;
   }
@@ -108,7 +108,7 @@ export function exchangeOAuth(request: Request, response: Response, users: UserS
 export function unlinkOAuth(request: Request, response: Response, accounts: ProviderAccountStore): void {
   if (request.userId === undefined) throw new HttpError(401, "Unauthorized", { success: false, message: "Unauthorized" });
   const provider = providerId(routeProvider(request));
-  if (accounts.listForUser(request.userId).length < 2) throw new HttpError(409, "Cannot unlink the last sign-in provider", { success: false, message: "Cannot unlink the last sign-in provider" });
-  if (!accounts.delete(request.userId, provider)) throw new HttpError(404, "Provider is not linked", { success: false, message: "Provider is not linked" });
+  if (!accounts.listForUser(request.userId).some(account => account.provider === provider)) throw new HttpError(404, "Provider is not linked");
+  if (!accounts.unlinkSafely(request.userId, provider)) throw new HttpError(409, "Cannot unlink the last sign-in provider");
   sendJson(response, 200, { providers: accounts.listForUser(request.userId).map(({ provider: id, login }) => ({ id, login })) });
 }

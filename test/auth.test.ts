@@ -67,6 +67,43 @@ describe("OAuth authentication", () => {
     expect((await requestJson(testServer.baseUrl, "/auth/oauth/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) })).response.status).toBe(401);
   });
 
+  it("links a key account, rejects duplicate providers and identities owned by another user", async () => {
+    testServer = await createTestServer();
+    const created = await requestJson(testServer.baseUrl, "/auth/key/register", { method: "POST" });
+    const token = created.body?.token as string;
+    const userId = (created.body?.user as { id: number }).id;
+    const link = async (provider: string, code?: string, owner = token) => {
+      const start = await requestJson(testServer!.baseUrl, `/auth/oauth/${provider}/start`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${owner}` }, body: JSON.stringify({ mode: "link", redirectUri: "http://127.0.0.1/link-result" }) });
+      expect(start.response.status).toBe(200);
+      return (await followAuthorization(testServer!.baseUrl, start.body?.authorizeUrl as string, code)).headers.get("location")!;
+    };
+    expect(await link("github")).toContain("linked=1");
+    expect(await link("github")).toContain("error=provider_type_already_linked");
+    expect(await link("github", "fake-user-bob")).toContain("error=provider_type_already_linked");
+    expect(await link("google")).toContain("linked=1");
+    const signedIn = await signIn(testServer.baseUrl);
+    const profile = await requestJson(testServer.baseUrl, "/me", { headers: { Authorization: `Bearer ${signedIn}` } });
+    expect(profile.body?.user).toMatchObject({ id: userId, hasLoginKey: true, providers: [{ id: "github" }, { id: "google" }] });
+    const second = await signIn(testServer.baseUrl, "github", "charlie");
+    expect(await link("google", undefined, second)).toContain("error=provider_already_linked");
+    // A retained login key allows removal of the last OAuth provider.
+    for (const provider of ["github", "google"]) {
+      expect((await requestJson(testServer.baseUrl, `/auth/oauth/${provider}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } })).response.status).toBe(200);
+    }
+    const login = await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: created.body?.key }) });
+    expect(login.response.status).toBe(200);
+    expect(login.body?.user).toMatchObject({ id: userId, providers: [] });
+  });
+
+  it("allows only one of two competing same-provider bindings", async () => {
+    testServer = await createTestServer();
+    const created = await requestJson(testServer.baseUrl, "/auth/key/register", { method: "POST" });
+    const starts = await Promise.all([1, 2].map(() => requestJson(testServer!.baseUrl, "/auth/oauth/github/start", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${created.body?.token}` }, body: JSON.stringify({ mode: "link", redirectUri: "http://127.0.0.1/link-result" }) })));
+    const results = await Promise.all(starts.map((start, index) => followAuthorization(testServer!.baseUrl, start.body?.authorizeUrl as string, `fake-user-race${index}`)));
+    expect(results.filter(result => result.headers.get("location")?.includes("linked=1"))).toHaveLength(1);
+    expect(results.filter(result => result.headers.get("location")?.includes("error=provider_type_already_linked"))).toHaveLength(1);
+  });
+
   it("resets a backup key, exchanges it for a session, and revokes the old key", async () => {
     testServer = await createTestServer();
     const token = await signIn(testServer.baseUrl);

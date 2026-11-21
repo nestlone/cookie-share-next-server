@@ -63,7 +63,7 @@ export function exchangeBackupKey(request: Request, response: Response, backupKe
   });
 }
 
-export function getMe(request: Request, response: Response, users: UserStore, accounts: ProviderAccountStore, buckets: BucketStore, requestLog: RequestLogStore): void {
+export function getMe(request: Request, response: Response, users: UserStore, accounts: ProviderAccountStore, buckets: BucketStore, requestLog: RequestLogStore, backupKeys: BackupKeyStore): void {
   if (request.userId === undefined) throw new HttpError(401, "Unauthorized", { success: false, message: "Unauthorized" });
   const user = users.findById(request.userId);
   if (!user) throw new HttpError(401, "User not found", { success: false, message: "User not found" });
@@ -76,7 +76,7 @@ export function getMe(request: Request, response: Response, users: UserStore, ac
     updated_at: user.updated_at,
   };
   sendJson(response, 200, {
-    user: toAuthUser(publicUser, accounts),
+    user: { ...toAuthUser(publicUser, accounts), hasLoginKey: backupKeys.has(user.id) },
     usage: { usedBytes: buckets.usedBytes(user.id), todayRequests: requestLog.countSince(user.id, utcDayStart()), todayRequestsLimit: user.daily_request_limit },
   });
 }

@@ -10,6 +10,8 @@ The browser-readable privacy policy is served at `/privacy/`, with the reviewabl
 
 Users can create a standalone key account with one click, or authenticate through GitHub, Google, or LinuxDo OAuth. Provider identities are keyed by provider and subject; matching email addresses are never merged automatically. A signed-in user may manually link additional providers.
 
+Linking rejects identities owned by another account and additional identities from an already-linked provider. The insert checks both rules atomically. Unlinking atomically preserves at least one OAuth identity unless the user has a login key. `/api/v1/me` includes `user.hasLoginKey` so clients can explain which login methods may be removed. These rules apply to both Node.js/SQLite and Workers/D1, without a schema migration.
+
 OAuth results are delivered only to the Chrome extension IDs listed in `ALLOWED_EXTENSION_IDS`; this service never accepts a `*.chromiumapp.org` wildcard. New extension envelopes use PBKDF2-SHA-256 with 600,000 iterations. Existing version-1 envelopes remain readable at their original 100,000 iterations.
 
 Bucket passwords are never submitted to this server. Stored records contain a bucket ID, encrypted envelope, ciphertext byte size, and timestamps. This does not conceal account identities, bucket counts, approximate ciphertext sizes, or request timing. See [the protocol and threat model](docs/protocol.md) for the data model and cryptographic format.

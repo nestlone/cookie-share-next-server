@@ -78,7 +78,7 @@ export function createApp(config: RuntimeConfig, db: DatabaseSync, configuredPro
   app.post("/api/v1/auth/backup-key/reset", authRequired, (request, response) => resetBackupKey(request, response, backupKeys));
   app.delete("/api/v1/auth/oauth/:provider", authRequired, (request, response) => unlinkOAuth(request, response, accounts));
   app.post("/api/v1/auth/logout", authRequired, (request, response) => logout(request, response, sessions));
-  app.get("/api/v1/me", authRequired, userRateLimit, (request, response) => getMe(request, response, users, accounts, buckets, requestLog));
+  app.get("/api/v1/me", authRequired, userRateLimit, (request, response) => getMe(request, response, users, accounts, buckets, requestLog, backupKeys));
   app.post("/api/v1/buckets", authRequired, userRateLimit, (request, response) => createBucket(request, response, users, buckets));
   app.get("/api/v1/buckets", authRequired, userRateLimit, (request, response) => listBuckets(request, response, buckets));
   app.get("/api/v1/buckets/:id", authRequired, userRateLimit, (request, response) => getBucket(request, response, buckets));

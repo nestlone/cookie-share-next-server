@@ -25,4 +25,19 @@ export class ProviderAccountStore {
   public delete(userId: number, provider: OAuthProviderId): boolean {
     return this.db.prepare("DELETE FROM provider_accounts WHERE user_id = ? AND provider = ?").run(userId, provider).changes > 0;
   }
+
+  public link(userId: number, provider: OAuthProviderId, subject: string, login: string): string | null {
+    const result = this.db.prepare(`INSERT INTO provider_accounts (user_id, provider, subject, login, created_at)
+      SELECT ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM provider_accounts WHERE (provider = ? AND subject = ?) OR (user_id = ? AND provider = ?))
+      ON CONFLICT DO NOTHING`).run(userId, provider, subject, login, new Date().toISOString(), provider, subject, userId, provider);
+    if (result.changes) return null;
+    const existing = this.find(provider, subject);
+    return existing && existing.user_id !== userId ? "provider_already_linked" : "provider_type_already_linked";
+  }
+
+  public unlinkSafely(userId: number, provider: OAuthProviderId): boolean {
+    return this.db.prepare(`DELETE FROM provider_accounts WHERE user_id = ? AND provider = ?
+      AND (EXISTS (SELECT 1 FROM backup_keys WHERE user_id = ?) OR (SELECT COUNT(*) FROM provider_accounts WHERE user_id = ?) > 1)`)
+      .run(userId, provider, userId, userId).changes > 0;
+  }
 }

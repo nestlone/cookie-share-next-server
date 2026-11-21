@@ -53,16 +53,19 @@ function ipRateLimit(config: Pick<RuntimeConfig, "loginRateLimit" | "loginRateWi
     cleanupTimer.unref();
   }
 
-  return (request: Request, _response: Response, next: NextFunction): void => {
+  return (request: Request, response: Response, next: NextFunction): void => {
     const ip = request.ip ?? request.socket.remoteAddress ?? "unknown";
     const now = Date.now();
     const cutoff = now - windowMs;
     const timestamps = (attempts.get(ip) ?? []).filter((t) => t > cutoff);
 
     if (timestamps.length >= limit) {
+      const retryAfter = Math.max(1, Math.ceil(((timestamps[0] ?? now) + windowMs - now) / 1000));
+      response.setHeader("Retry-After", retryAfter);
       throw new HttpError(429, message, {
         success: false,
         message,
+        retryAfter,
       });
     }
 
@@ -76,9 +79,13 @@ export function loginRateLimit(config: RuntimeConfig) {
   return ipRateLimit(config, "Too many login attempts. Try again later.");
 }
 
-/** Backup keys have a deliberately tighter, fixed public login limit. */
+/** Independent limits prevent one authentication flow exhausting another. */
 export function backupKeyRateLimit() {
-  return ipRateLimit({ loginRateLimit: 3, loginRateWindowMin: 1 }, "Too many backup-key attempts. Try again later.");
+  return ipRateLimit({ loginRateLimit: 20, loginRateWindowMin: 1 }, "Too many key login attempts.");
+}
+
+export function keyRegistrationRateLimit() {
+  return ipRateLimit({ loginRateLimit: 5, loginRateWindowMin: 1 }, "Too many account creation attempts.");
 }
 
 export function adminRateLimit(config: RuntimeConfig) {

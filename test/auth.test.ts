@@ -82,15 +82,51 @@ describe("OAuth authentication", () => {
     expect((await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key }) })).response.status).toBe(401);
   });
 
-  it("limits backup-key exchanges to three attempts per IP per minute", async () => {
+  it("allows twenty key attempts and returns a precise retry delay", async () => {
     testServer = await createTestServer();
     const token = await signIn(testServer.baseUrl);
     const reset = await requestJson(testServer.baseUrl, "/auth/backup-key/reset", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
     const key = reset.body?.key as string;
-    for (let attempt = 0; attempt < 3; attempt += 1) {
+    for (let attempt = 0; attempt < 20; attempt += 1) {
       expect((await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "invalid" }) })).response.status).toBe(401);
     }
-    expect((await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key }) })).response.status).toBe(429);
+    const blocked = await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key }) });
+    expect(blocked.response.status).toBe(429);
+    expect(Number(blocked.response.headers.get("Retry-After"))).toBeGreaterThan(0);
+    expect(blocked.body?.retryAfter).toBeLessThanOrEqual(60);
+  });
+
+  it("creates a key-only account without OAuth, supports login and key rotation", async () => {
+    testServer = await createTestServer({}, []);
+    const created = await requestJson(testServer.baseUrl, "/auth/key/register", { method: "POST" });
+    expect(created.response.status).toBe(201);
+    expect(created.response.headers.get("Cache-Control")).toBe("no-store");
+    expect(created.body?.key).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    expect(created.body?.key).not.toBe(created.body?.token);
+    expect(created.body?.user).toMatchObject({ providers: [], quotaBytes: 1048576 });
+    const headers = { Authorization: `Bearer ${created.body?.token}` };
+    const me = await requestJson(testServer.baseUrl, "/me", { headers });
+    expect(me.response.status).toBe(200);
+    expect(JSON.stringify(me.body)).not.toContain(created.body?.key);
+    await requestJson(testServer.baseUrl, "/auth/logout", { method: "POST", headers });
+    const login = await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: created.body?.key }) });
+    expect(login.response.status).toBe(200);
+    expect(login.body?.user).toEqual(created.body?.user);
+    const rotated = await requestJson(testServer.baseUrl, "/auth/backup-key/reset", { method: "POST", headers: { Authorization: `Bearer ${login.body?.token}` } });
+    expect(rotated.response.status).toBe(200);
+    expect((await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: created.body?.key }) })).response.status).toBe(401);
+    expect((await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: rotated.body?.key }) })).response.status).toBe(200);
+  });
+
+  it("limits registrations separately and does not block OAuth steps from each other", async () => {
+    testServer = await createTestServer({ loginRateLimit: 1 });
+    const token = await signIn(testServer.baseUrl);
+    expect(token).toBeTruthy();
+    for (let i = 0; i < 5; i++) {
+      expect((await requestJson(testServer.baseUrl, "/auth/key/register", { method: "POST" })).response.status).toBe(201);
+    }
+    expect((await requestJson(testServer.baseUrl, "/auth/key/register", { method: "POST" })).response.status).toBe(429);
+    expect((await requestJson(testServer.baseUrl, "/auth/backup-key/exchange", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "invalid" }) })).response.status).toBe(401);
   });
 
   it("only permits OAuth result redirects for explicitly allowed extension IDs", async () => {

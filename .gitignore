@@ -4,5 +4,6 @@ data/
 coverage/
 .env
 .dev.vars
+.wrangler/
 *.log
 *.csn-bucket.json

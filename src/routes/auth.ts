@@ -1,4 +1,6 @@
 import type { Request, Response } from "express";
+import { randomUUID } from "node:crypto";
+import type { DatabaseSync } from "node:sqlite";
 import { HttpError } from "../errors";
 import { sendJson, sendNoContent } from "../http";
 import type { BucketStore } from "../store/buckets";
@@ -7,7 +9,7 @@ import type { ProviderAccountStore } from "../store/provider-accounts";
 import type { RequestLogStore } from "../store/request-log";
 import type { SessionStore } from "../store/sessions";
 import type { UserStore } from "../store/users";
-import type { AuthUserPayload, PublicUser } from "../types";
+import type { AuthUserPayload, PublicUser, RuntimeConfig } from "../types";
 
 export function toAuthUser(user: PublicUser, accounts: ProviderAccountStore): AuthUserPayload {
   return {
@@ -31,7 +33,23 @@ export function logout(request: Request, response: Response, sessions: SessionSt
 
 export function resetBackupKey(request: Request, response: Response, backupKeys: BackupKeyStore): void {
   if (request.userId === undefined) throw new HttpError(401, "Unauthorized", { success: false, message: "Unauthorized" });
+  response.setHeader("Cache-Control", "no-store");
   sendJson(response, 200, { key: backupKeys.reset(request.userId) });
+}
+
+export function registerKeyAccount(response: Response, db: DatabaseSync, config: RuntimeConfig, users: UserStore, backupKeys: BackupKeyStore, accounts: ProviderAccountStore, sessions: SessionStore): void {
+  db.exec("BEGIN IMMEDIATE");
+  let result;
+  try {
+    const user = users.create({ displayName: `Key-${randomUUID()}`, quotaBytes: config.defaultQuotaBytes, dailyRequestLimit: config.defaultDailyRequestLimit });
+    result = { key: backupKeys.reset(user.id), token: sessions.create(user.id), user: toAuthUser(user, accounts) };
+    db.exec("COMMIT");
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  }
+  response.setHeader("Cache-Control", "no-store");
+  sendJson(response, 201, result);
 }
 
 export function exchangeBackupKey(request: Request, response: Response, backupKeys: BackupKeyStore, users: UserStore, accounts: ProviderAccountStore, sessions: SessionStore): void {

@@ -18,7 +18,7 @@
   </header>
   <main class="legal-page">
     <section class="legal-hero">
-      <div><p class="eyebrow">隐私 · 透明 · 用户控制</p><h1>隐私权<br><em>政策</em></h1><p class="legal-updated">生效及最后更新：2026 年 10 月 26 日</p></div>
+      <div><p class="eyebrow">隐私 · 透明 · 用户控制</p><h1>隐私权<br><em>政策</em></h1><p class="legal-updated">生效：2026 年 10 月 26 日 · 最后更新：2026 年 11 月 21 日</p></div>
       <aside class="legal-summary" aria-label="政策摘要"><strong>简要说明</strong><p>仅在您主动使用账号功能时访问浏览器状态。敏感账号状态会在扩展内加密后再同步。我们不会出售数据，也不会将其用于广告。</p></aside>
     </section>
 
@@ -28,7 +28,7 @@
       <p class="eyebrow">完整政策</p><h2>我们如何处理您的信息</h2>
       <section><span class="legal-number">01</span><div><h3>产品用途</h3><p>Cookie Share Next 用于在用户自己的浏览器之间保存和切换其有权使用的网站登录状态。只有当您主动要求保存或切换账号时，扩展才会读取登录状态。敏感浏览器状态会在扩展内加密后再同步；服务端只保存加密信封，无法解密其中内容。</p></div></section>
       <section><span class="legal-number">02</span><div><h3>扩展访问的数据</h3><p>为完成您主动请求的功能，扩展可能访问：</p><ul><li>当前标签页的 URL、主机名、标题和图标，用于识别当前网站；</li><li>当前网站的 Cookie，包括 Chromium 允许访问的 HTTPOnly Cookie 和分区 Cookie；</li><li>当前网站同源的 <code>localStorage</code> 与 <code>sessionStorage</code>；</li><li>扩展设置、服务器地址、扩展登录会话和本地加密状态；</li><li>您明确选择导入或导出的账号备份文件。</li></ul><p>扩展不会持续扫描标签页、收集浏览历史、注入广告，也不会使用这些数据建立用户画像。</p></div></section>
-      <section><span class="legal-number">03</span><div><h3>官方服务接收的数据</h3><ul><li>OAuth 提供商、该提供商分配的账号标识符以及登录名或显示名称；使用 Google 登录时，可能包括 Google 返回的电子邮箱地址。</li><li>加密账号桶、不透明桶标识符、密文大小以及时间戳。</li><li>服务会话令牌和备用登录密钥的密码学哈希；备用密钥明文仅显示一次，服务端不保存明文。</li><li>短期 OAuth 状态和交换记录。</li><li>用于执行请求限制和保护服务的账号 ID、API 路径及时间戳。</li><li>用于短期限流和防止滥用的请求 IP 地址。</li><li>Cloudflare 在交付和保护服务时处理的技术请求元数据。</li></ul><p>OAuth 访问令牌仅临时用于获取最少量身份信息，Cookie Share Next 不会保存该访问令牌。</p></div></section>
+      <section><span class="legal-number">03</span><div><h3>官方服务接收的数据</h3><ul><li>独立密钥账户的随机显示名称；选择 OAuth 时，还包括提供商、该提供商分配的账号标识符以及登录名或显示名称；使用 Google 登录时，可能包括 Google 返回的电子邮箱地址。</li><li>加密账号桶、不透明桶标识符、密文大小以及时间戳。</li><li>服务会话令牌及独立密钥账户或 OAuth 备用登录密钥的密码学哈希；密钥明文仅在创建或重置时显示一次，服务端不保存明文。</li><li>短期 OAuth 状态和交换记录。</li><li>用于执行请求限制和保护服务的账号 ID、API 路径及时间戳。</li><li>用于短期限流和防止滥用的请求 IP 地址。</li><li>Cloudflare 在交付和保护服务时处理的技术请求元数据。</li></ul><p>OAuth 访问令牌仅临时用于获取最少量身份信息，Cookie Share Next 不会保存该访问令牌。</p></div></section>
       <section><span class="legal-number">04</span><div><h3>数据用途</h3><p>我们仅将数据用于身份验证、按照用户请求关联登录提供商、同步加密账号桶、执行配额、防止滥用、维护安全、排查运行故障，以及提供用户请求的导入、导出、切换和删除功能。</p><p><strong>我们不会出售个人数据。</strong>我们不会将用户数据用于或转移给个性化广告、重新定向广告、信贷决策或无关分析。服务端不持有保险库密码或解密密钥，因此人工无法读取已解密的 Cookie 或浏览器存储。</p></div></section>
       <section><span class="legal-number">05</span><div><h3>加密与安全</h3><p>Cookie 值、已保存的浏览器存储、桶名称及相关账号状态内容会在上传前于扩展内加密。保险库密码及派生解密密钥保留在扩展内。官方服务仅接收这些内容的加密信封，网络通信使用 HTTPS。</p><p>任何系统都无法保证绝对安全。请妥善保护导出文件、保险库密码、备用登录密钥、OAuth 账号以及能够访问扩展的设备。</p></div></section>
       <section><span class="legal-number">06</span><div><h3>服务提供商与披露</h3><ul><li><strong>Cloudflare</strong> 托管并保护官方 Worker 服务和 D1 数据库，同时处理网络及基础设施元数据。</li><li><strong>GitHub、Google 或 LinuxDo</strong> 在您选择相应方式时处理身份验证，并适用其各自的隐私政策。</li><li>当您配置扩展连接到<strong>用户选择的自托管服务器</strong>时，该服务器会接收加密账号桶，并由其运营者控制。</li></ul><p>在适用法律要求，或为保护用户、服务及公众免受安全威胁或滥用而具有合理必要性时，我们可能披露相关信息。</p></div></section>

@@ -1,7 +1,7 @@
 # Cookie Share Next Privacy Policy / 隐私权政策
 
 **Effective date / 生效日期:** October 26, 2026 / 2026 年 10 月 26 日  
-**Last updated / 最后更新:** October 26, 2026 / 2026 年 10 月 26 日
+**Last updated / 最后更新:** November 21, 2026 / 2026 年 11 月 21 日
 
 This policy applies to the Cookie Share Next browser extension and the official service at `https://cookie.nestlone.com`. A self-hosted server is operated by its own administrator and may have an additional privacy policy.
 
@@ -31,9 +31,9 @@ The extension does not continuously scan tabs, collect browsing history, inject 
 
 The official service may receive and store:
 
-- an OAuth provider name, provider-specific account identifier, and provider login/display name; for Google sign-in, the displayed login may be the email address returned by Google;
+- a generated display name for standalone key accounts; if OAuth is chosen, an OAuth provider name, provider-specific account identifier, and provider login/display name; for Google sign-in, the displayed login may be the email address returned by Google;
 - encrypted account buckets, opaque bucket identifiers, ciphertext sizes, and creation/update timestamps;
-- cryptographic hashes of service session tokens and backup login keys; plaintext backup keys are shown to the user once and are not stored by the service;
+- cryptographic hashes of service session tokens and login keys for standalone key accounts or OAuth backup login; plaintext keys are shown once when created or reset and are not stored by the service;
 - short-lived OAuth state and exchange records needed to complete sign-in securely;
 - account ID, API endpoint, and timestamp records used to enforce daily request limits and protect the service;
 - the requesting IP address for short-lived login rate limiting and abuse prevention;
@@ -118,9 +118,9 @@ Cookie Share Next 用于在用户自己的浏览器之间保存和切换其有�
 
 官方服务可能接收和保存：
 
-- OAuth 提供商名称、该提供商分配的账号标识符以及登录名或显示名称；使用 Google 登录时，显示的登录名可能是 Google 返回的电子邮箱地址；
+- 独立密钥账户的随机显示名称；选择 OAuth 时，还包括提供商名称、该提供商分配的账号标识符以及登录名或显示名称；使用 Google 登录时，显示的登录名可能是 Google 返回的电子邮箱地址；
 - 加密账号桶、不透明的桶标识符、密文大小以及创建和更新时间；
-- 服务会话令牌和备用登录密钥的密码学哈希；备用登录密钥明文仅向用户显示一次，服务端不保存明文；
+- 服务会话令牌及独立密钥账户或 OAuth 备用登录密钥的密码学哈希；密钥明文仅在创建或重置时显示一次，服务端不保存明文；
 - 安全完成登录所需的短期 OAuth 状态和交换记录；
 - 用于执行每日请求限制和保护服务的账号 ID、API 路径及时间戳记录；
 - 用于短期限流和防止滥用的请求 IP 地址；

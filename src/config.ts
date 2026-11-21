@@ -64,7 +64,6 @@ function loadProviders(): OAuthProviderConfig[] {
 export function loadRuntimeConfig(): RuntimeConfig {
   const publicBaseUrl = requireString("PUBLIC_BASE_URL").replace(/\/$/, "");
   const oauthProviders = loadProviders();
-  if (oauthProviders.length === 0) throw new HttpError(500, "Configure at least one OAuth provider", { success: false, error: "Configure at least one OAuth provider" }, { plain: true });
   return {
     host: optionalString("HOST", "0.0.0.0"),
     trustProxy: optionalBoolean("TRUST_PROXY", false),
@@ -77,8 +76,8 @@ export function loadRuntimeConfig(): RuntimeConfig {
     defaultQuotaBytes: optionalInt("DEFAULT_QUOTA_BYTES", 10485760),
     defaultDailyRequestLimit: optionalInt("DEFAULT_DAILY_REQUEST_LIMIT", 1000),
     sessionTtlHours: optionalInt("SESSION_TTL_HOURS", 720),
-    loginRateLimit: optionalInt("LOGIN_RATE_LIMIT", 10),
-    loginRateWindowMin: optionalInt("LOGIN_RATE_WINDOW_MIN", 15),
+    loginRateLimit: optionalInt("LOGIN_RATE_LIMIT", 30),
+    loginRateWindowMin: optionalInt("LOGIN_RATE_WINDOW_MIN", 1),
     requestLogRetentionDays: optionalInt("REQUEST_LOG_RETENTION_DAYS", 7),
     oauthProviders,
   };

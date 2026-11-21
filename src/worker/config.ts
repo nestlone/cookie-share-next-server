@@ -63,7 +63,6 @@ export function loadWorkerConfig(env: WorkerEnv): WorkerConfig {
     if (!clientId || !clientSecret) throw new Error(`Incomplete ${prefix} OAuth configuration`);
     return [{ id, name: id === "github" ? "GitHub" : id === "google" ? "Google" : "LinuxDo", clientId, clientSecret }];
   });
-  if (oauthProviders.length === 0) throw new Error("Configure at least one OAuth provider");
 
   return {
     publicBaseUrl: required(env, "PUBLIC_BASE_URL").replace(/\/$/, ""),
@@ -72,8 +71,8 @@ export function loadWorkerConfig(env: WorkerEnv): WorkerConfig {
     defaultQuotaBytes: integer(env, "DEFAULT_QUOTA_BYTES", 10485760),
     defaultDailyRequestLimit: integer(env, "DEFAULT_DAILY_REQUEST_LIMIT", 1000),
     sessionTtlHours: integer(env, "SESSION_TTL_HOURS", 720),
-    loginRateLimit: integer(env, "LOGIN_RATE_LIMIT", 10),
-    loginRateWindowMin: integer(env, "LOGIN_RATE_WINDOW_MIN", 15),
+    loginRateLimit: integer(env, "LOGIN_RATE_LIMIT", 30),
+    loginRateWindowMin: integer(env, "LOGIN_RATE_WINDOW_MIN", 1),
     requestLogRetentionDays: integer(env, "REQUEST_LOG_RETENTION_DAYS", 7),
     oauthProviders,
   };

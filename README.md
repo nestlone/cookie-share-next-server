@@ -8,7 +8,7 @@ The browser-readable privacy policy is served at `/privacy/`, with the reviewabl
 
 ## Security model
 
-Users authenticate through GitHub, Google, or LinuxDo OAuth. Provider identities are keyed by provider and subject; matching email addresses are never merged automatically. A signed-in user may manually link additional providers.
+Users can create a standalone key account with one click, or authenticate through GitHub, Google, or LinuxDo OAuth. Provider identities are keyed by provider and subject; matching email addresses are never merged automatically. A signed-in user may manually link additional providers.
 
 OAuth results are delivered only to the Chrome extension IDs listed in `ALLOWED_EXTENSION_IDS`; this service never accepts a `*.chromiumapp.org` wildcard. New extension envelopes use PBKDF2-SHA-256 with 600,000 iterations. Existing version-1 envelopes remain readable at their original 100,000 iterations.
 
@@ -19,7 +19,7 @@ Bucket passwords are never submitted to this server. Stored records contain a bu
 - Node.js 22.5 or newer, including `node:sqlite` support.
 - SQLite storage available to the Node.js process.
 - For public OAuth deployments, HTTPS must be provided by the surrounding infrastructure.
-- At least one configured OAuth client.
+- OAuth clients are optional; standalone key accounts work without them.
 
 ## Quick start
 
@@ -30,7 +30,7 @@ npm run build
 npm start
 ```
 
-Edit `.env` before starting. Set a long random `ADMIN_TOKEN`, the public HTTPS origin, and complete client ID/client secret pairs for one or more OAuth providers.
+Edit `.env` before starting. Set a long random `ADMIN_TOKEN`, the public HTTPS origin, and, if OAuth is desired, complete client ID/client secret pairs for the selected providers.
 
 ```dotenv
 PUBLIC_BASE_URL=https://cookie.nestlone.com
@@ -64,7 +64,9 @@ LINUXDO_CLIENT_SECRET=
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | optional pair | Enables Google OAuth. |
 | `LINUXDO_CLIENT_ID` / `LINUXDO_CLIENT_SECRET` | optional pair | Enables LinuxDo OAuth. |
 
-The application refuses to start when no complete OAuth provider configuration is available.
+OAuth is optional. Incomplete client ID/secret pairs are rejected. `POST /api/v1/auth/key/register` creates an account and returns a random 256-bit login key, a separate session token, and the user profile. The key is displayed once at creation or reset; only its SHA-256 hash is stored. Use `/auth/backup-key/exchange` to sign in and the authenticated `/auth/backup-key/reset` to rotate it. Losing the key after signing out of an account with no linked provider means losing access.
+
+Per-IP limits are independent: key login 20/minute, key registration 5/minute, OAuth 30/minute per step by default (`LOGIN_RATE_LIMIT=30`, `LOGIN_RATE_WINDOW_MIN=1`). A 429 response includes `Retry-After` and a JSON `retryAfter` in seconds. A single OAuth login no longer shares one counter across its three steps.
 
 ## OAuth setup
 
@@ -86,7 +88,7 @@ Docker Compose runs one backend container and persists the SQLite database in th
    cp .env.example .env
    ```
 
-   Set `ADMIN_TOKEN`, `PUBLIC_BASE_URL`, and a complete OAuth client ID/secret pair. `PUBLIC_BASE_URL` must be the externally reachable HTTPS origin, because it determines the OAuth callback URL.
+   Set `ADMIN_TOKEN`, `PUBLIC_BASE_URL`, and, optionally, a complete OAuth client ID/secret pair. `PUBLIC_BASE_URL` must be the externally reachable HTTPS origin, because it determines the OAuth callback URL.
 
 2. Build and start the service:
 
@@ -152,7 +154,7 @@ Workers is a separate deployment target with the same `/api/v1` HTTP contract as
 
 3. In the D1 database's **Console** tab, paste and execute the complete contents of [`migrations/0001_initial.sql`](migrations/0001_initial.sql). This initializes the tables required by the Worker. Confirm that the D1 overview no longer reports zero tables before attempting sign-in.
 
-4. In the Worker dashboard's Variables and Secrets UI, configure at least one complete OAuth client pair. Do not commit secrets or upload `.env` files.
+4. In the Worker dashboard's Variables and Secrets UI, optionally configure complete OAuth client pairs. Do not commit secrets or upload `.env` files.
 
    When using the Cloudflare dashboard's **Workers & Pages → Settings → Variables and Secrets** UI, use these binding types:
 
